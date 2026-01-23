@@ -2,27 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import EventBookingModal from '../components/EventBookingModal';
 
 const Events = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [bookingLoading, setBookingLoading] = useState(null);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [user, setUser] = useState(null); // To pass to modal
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const res = await axios.get('/api/events');
-                // Check if the response data structure matches what we expect
                 if (res.data && res.data.data && Array.isArray(res.data.data.events)) {
                     setEvents(res.data.data.events);
                 } else {
                     setError("Invalid data format received from server.");
                 }
+
+                // Also fetch user to pre-fill modal if logged in
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const userRes = await axios.get('/api/users/me', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setUser(userRes.data.data.user);
+                }
+
             } catch (err) {
-                console.error("Error fetching events:", err);
-                setError(err.message || "Failed to load events. Please check your connection.");
+                console.error("Error fetching data:", err);
+                setError(err.message || "Failed to load events.");
             } finally {
                 setLoading(false);
             }
@@ -31,27 +43,30 @@ const Events = () => {
         fetchEvents();
     }, []);
 
-    const handleRegister = async (eventId, eventTitle) => {
+    const handleOpenBooking = (event) => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
             return;
         }
+        setSelectedEvent(event);
+        setIsBookingModalOpen(true);
+    };
 
-        if (!window.confirm(`Confirm your reservation for ${eventTitle}?`)) return;
+    const handleBookingConfirm = async () => {
+        if (!selectedEvent) return;
+        const token = localStorage.getItem('token');
 
-        setBookingLoading(eventId);
         try {
-            await axios.post(`/api/events/${eventId}/book`, {}, {
+            await axios.post(`/api/events/${selectedEvent._id}/book`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Booking Successful! Check your profile for tickets.');
+            setIsBookingModalOpen(false);
             navigate('/profile');
         } catch (err) {
             console.error('Booking failed', err);
             const msg = err.response?.data?.message || 'Booking failed.';
-
-            // Handle invalid token / signature
             if (msg.includes('invalid signature') || msg.includes('jwt malformed') || err.response?.status === 401) {
                 alert('Your session has expired. Please log in again.');
                 localStorage.removeItem('token');
@@ -59,8 +74,6 @@ const Events = () => {
             } else {
                 alert(msg);
             }
-        } finally {
-            setBookingLoading(null);
         }
     };
 
@@ -77,6 +90,14 @@ const Events = () => {
 
     return (
         <div className="min-h-screen pt-28 pb-16 px-4 bg-dark-900">
+            <EventBookingModal
+                event={selectedEvent}
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                onConfirm={handleBookingConfirm}
+                user={user}
+            />
+
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl md:text-6xl font-display font-bold mb-4 text-white">Upcoming <span className="text-gold italic">Collections</span></h1>
@@ -112,11 +133,10 @@ const Events = () => {
                                 <div className="flex items-center justify-between mt-auto gap-4">
                                     <span className="text-white font-display font-bold text-xl">₹{event.price}</span>
                                     <button
-                                        onClick={() => handleRegister(event._id, event.title)}
-                                        disabled={bookingLoading === event._id}
-                                        className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-600 hover:border-secondary-600 transition-all duration-300 disabled:opacity-50"
+                                        onClick={() => handleOpenBooking(event)}
+                                        className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-600 hover:border-secondary-600 transition-all duration-300"
                                     >
-                                        {bookingLoading === event._id ? 'Booking...' : 'Reserve Seat'}
+                                        Reserve Seat
                                     </button>
                                 </div>
                             </div>

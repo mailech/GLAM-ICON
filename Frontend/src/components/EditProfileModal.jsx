@@ -11,14 +11,25 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
         instagram: user?.socialLinks?.instagram || '',
         linkedin: user?.socialLinks?.linkedin || '',
         portfolio: user?.socialLinks?.portfolio || '',
+        photo: null // File object
     });
+    const [preview, setPreview] = useState(
+        user?.photo && user.photo !== 'default.jpg'
+            ? `/img/users/${user.photo}`
+            : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`
+    );
     const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, files } = e.target;
+        if (name === 'photo' && files[0]) {
+            setFormData(prev => ({ ...prev, photo: files[0] }));
+            setPreview(URL.createObjectURL(files[0]));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -26,26 +37,50 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const payload = {
-                name: formData.name,
-                bio: formData.bio,
-                phone: formData.phone,
-                gender: formData.gender,
-                socialLinks: {
-                    instagram: formData.instagram,
-                    linkedin: formData.linkedin,
-                    portfolio: formData.portfolio
-                }
-            };
+            const data = new FormData();
 
-            const res = await axios.patch('/api/users/updateMe', payload, {
-                headers: { Authorization: `Bearer ${token}` }
+            // Append standard fields
+            data.append('name', formData.name);
+            data.append('bio', formData.bio);
+            data.append('phone', formData.phone);
+            data.append('gender', formData.gender);
+
+            // Append nested social links individually as backend might expect specific handling or flattening
+            // However, our backend controller simply takes body fields.
+            // But since we are using FormData, we can't send a JSON object directly for 'socialLinks'.
+            // We need to adjust either backend or send individual keys.
+            // Let's assume we modify backend or send keys that backend maps?
+            // Wait, previous backend controller: `const filteredBody = filterObj(req.body, ...)`
+            // If we send `socialLinks[instagram]`, express body-parser with extended:true might parse it, but multer handles multipart.
+            // Let's stick to flat keys if possible or send flattened structure if backend supports it.
+            // Actually, the backend User model has a socialLinks object.
+            // Let's just append them as 'socialLinks.instagram' etc if the backend implementation supports it, 
+            // OR simply update the Controller to handle individual fields if needed.
+            // Let's check `userController.js` logic again. It uses `filterObj` on `req.body`.
+            // `req.body` with multer will contain text fields.
+            // If we send `socialLinks` as a JSON string, we might need to parse it on backend.
+            // EASIEST FIX: Send them as `socialLinks` object if possible, but FormData converts to string.
+            // Let's append them individually and let's update backend to handle this or just try `socialLinks[instagram]` convention.
+
+            data.append('socialLinks[instagram]', formData.instagram);
+            data.append('socialLinks[linkedin]', formData.linkedin);
+            data.append('socialLinks[portfolio]', formData.portfolio);
+
+            if (formData.photo) {
+                data.append('photo', formData.photo);
+            }
+
+            const res = await axios.patch('/api/users/updateMe', data, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
             onUpdate(res.data.data.user);
             onClose();
         } catch (err) {
-            console.error(err);
+            console.error("Update failed", err);
         } finally {
             setLoading(false);
         }
@@ -64,6 +99,24 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
+
+                    {/* Photo Upload Section */}
+                    <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-full overflow-hidden border border-white/20 shrink-0">
+                            <img src={preview} alt="Profile Preview" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Profile Photo</label>
+                            <input
+                                type="file"
+                                name="photo"
+                                accept="image/*"
+                                onChange={handleChange}
+                                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500 transition cursor-pointer"
+                            />
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Full Name</label>

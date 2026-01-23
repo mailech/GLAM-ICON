@@ -9,13 +9,21 @@ const Register = () => {
     email: '',
     password: '',
     passwordConfirm: '',
+    photo: null
   });
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'photo') {
+      const file = e.target.files[0];
+      setFormData({ ...formData, photo: file });
+      setPhotoPreview(URL.createObjectURL(file));
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -25,18 +33,22 @@ const Register = () => {
     }
     setLoading(true);
     setError('');
+
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('email', formData.email);
+    data.append('password', formData.password);
+    data.append('passwordConfirm', formData.passwordConfirm);
+    if (formData.photo) {
+      data.append('photo', formData.photo);
+    }
+
     try {
-      const response = await axios.post('/api/users/signup', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        passwordConfirm: formData.passwordConfirm // Backend expects this
+      const response = await axios.post('/api/users/signup', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       console.log('Registration successful:', response.data);
-
-      // Save token
       localStorage.setItem('token', response.data.token);
-
       navigate('/profile');
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred during registration.');
@@ -46,7 +58,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[url('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center relative">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[url('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center relative py-20">
       <div className="absolute inset-0 bg-dark-900/90"></div>
 
       <motion.div
@@ -64,6 +76,30 @@ const Register = () => {
         {error && <p className="bg-red-500/10 border border-red-500/50 text-red-200 p-3 rounded text-center mb-6 text-sm">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Profile Picture Upload */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-gray-600 bg-dark-800 flex items-center justify-center">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-4xl text-gray-600">📷</span>
+                )}
+              </div>
+              <label htmlFor="photo" className="absolute bottom-0 right-0 bg-secondary-600 p-2 rounded-full cursor-pointer hover:bg-secondary-500 transition shadow-lg">
+                <span className="text-white text-xs block">➕</span>
+                <input
+                  type="file"
+                  id="photo"
+                  name="photo"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleChange}
+                />
+              </label>
+            </div>
+          </div>
+
           <div>
             <label htmlFor="name" className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-medium">Full Name</label>
             <input

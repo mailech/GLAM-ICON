@@ -35,7 +35,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 text-gray-100 font-sans relative">
+    <div className="min-h-screen bg-dark-900 text-gray-100 font-sans relative flex flex-col">
       <header className="fixed top-0 left-0 w-full z-50">
         <nav className="bg-dark-900/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -123,12 +123,80 @@ const Layout = () => {
         </AnimatePresence>
       </header>
 
-      <main className="relative z-0">
+      <main className="relative z-0 grow">
         <Outlet />
       </main>
 
-      <footer className="bg-dark-950 border-t border-white/5 py-12 text-center text-gray-600 text-xs uppercase tracking-widest px-4">
-        <p>&copy; 2026 Glam Icon India. The Epitome of Luxury.</p>
+      {/* Enhanced Footer */}
+      <footer className="bg-dark-950 border-t border-white/5 pt-20 pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+
+          {/* Brand Column */}
+          <div className="space-y-6">
+            <Link to="/" className="text-2xl font-display font-bold text-white tracking-widest uppercase flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-secondary-500 block"></span>
+              Glam Icon
+            </Link>
+            <p className="text-gray-500 text-sm leading-relaxed font-light">
+              India's premier digital platform for the fashion elite.
+              Bridging the gap between aspiring models, designers, and the world stage.
+            </p>
+            <div className="flex gap-4">
+              {['Instagram', 'Twitter', 'LinkedIn'].map(social => (
+                <a key={social} href="#" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-secondary-600 hover:text-white transition text-xs">
+                  {social[0]}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Links 1 */}
+          <div>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-6">Explore</h4>
+            <ul className="space-y-4 text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <li><Link to="/events" className="hover:text-secondary-400 transition">Fashion Weeks</Link></li>
+              <li><Link to="/events" className="hover:text-secondary-400 transition">Model Hunts</Link></li>
+              <li><a href="#" className="hover:text-secondary-400 transition">Designers</a></li>
+              <li><a href="#" className="hover:text-secondary-400 transition">Gallery</a></li>
+            </ul>
+          </div>
+
+          {/* Links 2 */}
+          <div>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-6">Company</h4>
+            <ul className="space-y-4 text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <li><a href="#" className="hover:text-secondary-400 transition">About Us</a></li>
+              <li><a href="#" className="hover:text-secondary-400 transition">Carrers</a></li>
+              <li><a href="#" className="hover:text-secondary-400 transition">Contact</a></li>
+              <li><a href="#" className="hover:text-secondary-400 transition">Partners</a></li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-6">Insiders</h4>
+            <p className="text-gray-500 text-xs mb-4">Subscribe for exclusive invites and updates.</p>
+            <div className="flex">
+              <input
+                type="email"
+                placeholder="EMAIL ADDRESS"
+                className="bg-white/5 border border-white/10 border-r-0 rounded-l-lg px-4 py-3 text-xs text-white w-full outline-none focus:bg-white/10 transition"
+              />
+              <button className="bg-secondary-600 text-white px-4 py-3 rounded-r-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-500 transition">
+                Join
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="max-w-7xl mx-auto border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600 uppercase tracking-wider">
+          <p>&copy; 2026 Glam Icon India. All rights reserved.</p>
+          <div className="flex gap-8">
+            <a href="#" className="hover:text-white transition">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition">Terms of Service</a>
+          </div>
+        </div>
       </footer>
     </div>
   );
