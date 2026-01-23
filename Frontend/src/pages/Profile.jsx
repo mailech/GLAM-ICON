@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TicketCard from '../components/TicketCard';
 import { useNavigate } from 'react-router-dom';
 import EditProfileModal from '../components/EditProfileModal';
+import TicketDetailsModal from '../components/TicketDetailsModal';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
@@ -11,6 +12,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('passes');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedTicket, setSelectedTicket] = useState(null); // For detail modal
     const navigate = useNavigate();
 
     const fetchProfile = async () => {
@@ -60,6 +62,12 @@ const Profile = () => {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onUpdate={(updatedUser) => setUser(updatedUser)}
+            />
+
+            <TicketDetailsModal
+                ticket={selectedTicket}
+                isOpen={!!selectedTicket}
+                onClose={() => setSelectedTicket(null)}
             />
 
             <div className="max-w-6xl mx-auto space-y-6">
@@ -186,7 +194,12 @@ const Profile = () => {
                                         >
                                             {eventTickets.length > 0 ? (
                                                 eventTickets.map(ticket => (
-                                                    <TicketCard key={ticket._id} ticket={ticket} user={user} />
+                                                    <TicketCard
+                                                        key={ticket._id}
+                                                        ticket={ticket}
+                                                        user={user}
+                                                        onClick={() => setSelectedTicket(ticket)}
+                                                    />
                                                 ))
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-white/5 rounded-xl">

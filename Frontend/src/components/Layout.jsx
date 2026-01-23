@@ -42,7 +42,7 @@ const Layout = () => {
 
             <Link to="/" className="text-2xl font-display font-bold text-white tracking-widest uppercase flex items-center gap-2 z-50 relative">
               <span className="w-2 h-8 bg-secondary-500 block"></span>
-              Glam Icon
+              GLAM ICON INDIA
             </Link>
 
             {/* Desktop Menu */}
@@ -51,6 +51,7 @@ const Layout = () => {
               {token ? (
                 <>
                   <NavLink to="/profile">Profile</NavLink>
+                  <NavLink to="/admin">Admin</NavLink>
                   <button
                     onClick={handleLogout}
                     className="px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/10 transition text-white"
@@ -135,7 +136,7 @@ const Layout = () => {
           <div className="space-y-6">
             <Link to="/" className="text-2xl font-display font-bold text-white tracking-widest uppercase flex items-center gap-2">
               <span className="w-1.5 h-6 bg-secondary-500 block"></span>
-              Glam Icon
+              GLAM ICON INDIA
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed font-light">
               India's premier digital platform for the fashion elite.

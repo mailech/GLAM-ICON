@@ -53,12 +53,14 @@ const Events = () => {
         setIsBookingModalOpen(true);
     };
 
-    const handleBookingConfirm = async () => {
+    const handleBookingConfirm = async (registrationData) => {
         if (!selectedEvent) return;
         const token = localStorage.getItem('token');
 
         try {
-            await axios.post(`/api/events/${selectedEvent._id}/book`, {}, {
+            await axios.post(`/api/events/${selectedEvent._id}/book`, {
+                registrationData
+            }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Booking Successful! Check your profile for tickets.');

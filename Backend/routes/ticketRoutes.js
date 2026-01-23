@@ -14,6 +14,11 @@ router
 
 router
     .route('/:id')
-    .get(ticketController.getTicket);
+    .get(ticketController.getTicket)
+    .patch(authController.restrictTo('admin'), ticketController.updateTicketStatus);
+
+// Admin routes
+// router.use(authController.restrictTo('admin'));
+router.route('/admin/all').get(ticketController.getAllTickets);
 
 module.exports = router;

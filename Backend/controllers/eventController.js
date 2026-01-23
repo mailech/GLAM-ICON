@@ -324,7 +324,8 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
       user: req.user.id,
       ticketNumber: `EVT-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       price: event.price,
-      qrCode: `ticket-${Date.now()}-${Math.floor(Math.random() * 1000)}.png`
+      qrCode: `ticket-${Date.now()}-${Math.floor(Math.random() * 1000)}.png`,
+      registrationData: req.body.registrationData
     });
     console.log('Ticket created successfully:', ticket._id);
 

@@ -42,7 +42,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
+    passwordConfirm: req.body.passwordConfirm,
+    photo: req.file ? req.file.filename : 'default.jpg'
   });
 
   // Create a Membership Ticket for the new user

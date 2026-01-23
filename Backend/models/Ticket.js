@@ -47,7 +47,22 @@ const ticketSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
     select: false
-  }
+  },
+  // Registration Details
+  registrationData: {
+    profilePhoto: String,
+    birthCertificate: String,
+    video: String,
+    age: Number,
+    height: String,
+    measurements: String
+  },
+  applicationStatus: {
+    type: String,
+    enum: ['pending', 'shortlisted', 'rejected'],
+    default: 'pending'
+  },
+  adminFeedback: String
 });
 
 // Indexes for better query performance

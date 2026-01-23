@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
-const TicketCard = ({ ticket, user }) => {
+const TicketCard = ({ ticket, user, onClick }) => {
     if (!ticket) return null;
 
     const isEventTicket = !!ticket.event;
@@ -42,10 +42,12 @@ const TicketCard = ({ ticket, user }) => {
     if (isEventTicket) {
         return (
             <motion.div
+                layoutId={`ticket-${ticket._id}`}
+                onClick={onClick}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="relative w-full drop-shadow-xl filter"
+                className="relative w-full drop-shadow-xl filter cursor-pointer group"
             >
                 <div className="flex flex-col sm:flex-row bg-dark-800 rounded-2xl overflow-hidden border border-white/10 relative h-auto sm:h-48">
 
@@ -79,6 +81,80 @@ const TicketCard = ({ ticket, user }) => {
                             </div>
                         </div>
 
+                        {/* Status Display */}
+                        <div className="mt-3 bg-dark-900/50 p-2 rounded border border-white/5">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Status</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-widest ${ticket.applicationStatus === 'shortlisted' ? 'text-green-400' :
+                                    ticket.applicationStatus === 'rejected' ? 'text-red-400' : 'text-yellow-400'
+                                    }`}>
+                                    {ticket.applicationStatus || 'Pending'}
+                                </span>
+                            </div>
+                            {ticket.applicationStatus === 'shortlisted' && (
+                                <div className="text-[10px] text-green-400/80 leading-tight">
+                                    Congratulations! You've been shortlisted.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Registration Details Display */}
+                        <div className="mt-3 bg-dark-900/50 p-2 rounded border border-white/5 space-y-1">
+                            <div className="flex justify-between items-center text-[10px] text-gray-500">
+                                <span className="uppercase tracking-wider">Registration Data</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                                {ticket.registrationData?.age && (
+                                    <div className="text-[10px] text-gray-400">
+                                        <span className="text-gray-600 block text-[8px] uppercase">Age</span>
+                                        {ticket.registrationData.age}
+                                    </div>
+                                )}
+                                {ticket.registrationData?.phone && (
+                                    <div className="text-[10px] text-gray-400">
+                                        <span className="text-gray-600 block text-[8px] uppercase">Phone</span>
+                                        {ticket.registrationData.phone}
+                                    </div>
+                                )}
+                            </div>
+                            {ticket.registrationData?.profilePhoto && (
+                                <div className="mt-1 pt-1 border-t border-white/5">
+                                    <a
+                                        href={`http://localhost:4005${ticket.registrationData.profilePhoto}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-[10px] text-secondary-500 hover:text-secondary-400 flex items-center gap-1"
+                                    >
+                                        <span>📷</span> View Submitted Photo
+                                    </a>
+                                </div>
+                            )}
+                            {ticket.registrationData?.birthCertificate && (
+                                <div className="mt-1">
+                                    <a
+                                        href={`http://localhost:4005${ticket.registrationData.birthCertificate}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                                    >
+                                        <span>📄</span> View Birth Certificate
+                                    </a>
+                                </div>
+                            )}
+                            {ticket.registrationData?.video && (
+                                <div className="mt-1">
+                                    <a
+                                        href={`http://localhost:4005${ticket.registrationData.video}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                                    >
+                                        <span>🎥</span> Watch Audition Video
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex items-center gap-3 mt-auto pt-3 border-t border-white/5">
                             <div className="w-6 h-6 rounded-full border border-secondary-500/50 p-0.5 shrink-0">
                                 <img src={user?.photo && user?.photo !== 'default.jpg' ? `/img/users/${user.photo}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`} alt="User" className="w-full h-full rounded-full bg-dark-700 object-cover" />
@@ -106,7 +182,7 @@ const TicketCard = ({ ticket, user }) => {
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </motion.div >
         );
     }
 
