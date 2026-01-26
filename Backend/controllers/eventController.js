@@ -4,6 +4,36 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
 const factory = require('./handlerFactory');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'events',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi'], // Allow videos
+    resource_type: 'auto', // Important for video
+    public_id: (req, file) => {
+      return `event-${req.params.id || 'new'}-${Date.now()}-${file.fieldname}`;
+    }
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Overlay the factory upload if we want to use Cloudinary for events too
+// exports.uploadEventImages = upload.fields([
+//   { name: 'imageCover', maxCount: 1 },
+//   { name: 'images', maxCount: 3 },
+//   { name: 'video', maxCount: 1 } // Adding video support if needed
+// ]);
 
 // Helper function to filter allowed fields
 const filterObj = (obj, ...allowedFields) => {

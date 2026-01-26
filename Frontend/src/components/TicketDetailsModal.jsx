@@ -7,7 +7,13 @@ const TicketDetailsModal = ({ ticket, isOpen, onClose }) => {
     const getMediaUrl = (path) => {
         if (!path) return '';
         if (path.startsWith('http')) return path;
-        return `http://localhost:4005${path.startsWith('/') ? path : `/${path}`}`;
+
+        // Handle Backslashes from Windows paths
+        const normalizedPath = path.replace(/\\/g, '/');
+        const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+
+        // Local Fallback
+        return `http://localhost:4005${cleanPath.startsWith('/uploads') ? cleanPath : `/uploads${cleanPath}`}`;
     };
 
     return (
@@ -40,8 +46,8 @@ const TicketDetailsModal = ({ ticket, isOpen, onClose }) => {
                                 />
                                 <div className="absolute bottom-3 left-3 z-20">
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${ticket.applicationStatus === 'shortlisted' ? 'bg-green-500 text-dark-900' :
-                                            ticket.applicationStatus === 'rejected' ? 'bg-red-500 text-white' :
-                                                'bg-yellow-500 text-dark-900'
+                                        ticket.applicationStatus === 'rejected' ? 'bg-red-500 text-white' :
+                                            'bg-yellow-500 text-dark-900'
                                         }`}>
                                         {ticket.applicationStatus || 'Pending'}
                                     </span>

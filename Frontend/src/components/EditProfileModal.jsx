@@ -126,6 +126,13 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                             />
                         </div>
                         <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Date of Birth</label>
+                            <input
+                                type="date" name="dob" value={formData.dob ? new Date(formData.dob).toISOString().split('T')[0] : ''} onChange={handleChange}
+                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
+                            />
+                        </div>
+                        <div className="space-y-2">
                             <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Phone Number</label>
                             <input
                                 type="text" name="phone" value={formData.phone} onChange={handleChange}

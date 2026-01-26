@@ -1,12 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const TicketCard = ({ ticket, user, onClick }) => {
     if (!ticket) return null;
+    const [isFlipped, setIsFlipped] = useState(false);
 
     const isEventTicket = !!ticket.event;
 
-    // --- 3D TILT LOGIC FOR MEMBERSHIP CARD ---
+    // --- 3D TILT LOGIC ---
     const cardRef = useRef(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -18,17 +19,14 @@ const TicketCard = ({ ticket, user, onClick }) => {
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
 
     const handleMouseMove = (e) => {
+        if (!cardRef.current) return;
         const rect = cardRef.current.getBoundingClientRect();
-
         const width = rect.width;
         const height = rect.height;
-
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
-
         const xPct = mouseX / width - 0.5;
         const yPct = mouseY / height - 0.5;
-
         x.set(xPct);
         y.set(yPct);
     };
@@ -38,237 +36,166 @@ const TicketCard = ({ ticket, user, onClick }) => {
         y.set(0);
     };
 
-    // EVENT TICKET LAYOUT (Compact)
-    if (isEventTicket) {
-        return (
-            <motion.div
-                layoutId={`ticket-${ticket._id}`}
-                onClick={onClick}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="relative w-full drop-shadow-xl filter cursor-pointer group"
-            >
-                <div className="flex flex-col sm:flex-row bg-dark-800 rounded-2xl overflow-hidden border border-white/10 relative h-auto sm:h-48">
-
-                    {/* Left Section: Visuals */}
-                    <div className="sm:w-32 lg:w-40 relative h-32 sm:h-full bg-dark-900 overflow-hidden shrink-0">
-                        <div className="absolute inset-0 bg-secondary-600/20 mix-blend-overlay z-10"></div>
-                        <img
-                            src={ticket.event.imageCover || ticket.event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"}
-                            alt="Event"
-                            className="w-full h-full object-cover opacity-80"
-                        />
-                    </div>
-
-                    {/* Middle Section: Event Details */}
-                    <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between border-r border-dashed border-white/5 relative bg-dark-800">
-                        {/* Perforation holes */}
-                        <div className="absolute -right-2 top-[-6px] w-4 h-4 bg-dark-900 rounded-full z-20 hidden sm:block"></div>
-                        <div className="absolute -right-2 bottom-[-6px] w-4 h-4 bg-dark-900 rounded-full z-20 hidden sm:block"></div>
-
-                        <div>
-                            <h2 className="text-lg sm:text-xl font-display font-bold text-white mb-1 leading-tight line-clamp-1">{ticket.event.title}</h2>
-                            <div className="flex flex-wrap gap-3 text-xs text-gray-400 font-light mb-2">
-                                <span className="flex items-center gap-1">
-                                    <span className="text-secondary-500">📅</span>
-                                    {ticket.event.startDate ? new Date(ticket.event.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' }) : "Date Postponed"}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <span className="text-secondary-500">📍</span>
-                                    <span className="truncate max-w-[150px]">{ticket.event.location?.address || "Location TBA"}</span>
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Status Display */}
-                        <div className="mt-3 bg-dark-900/50 p-2 rounded border border-white/5">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Status</span>
-                                <span className={`text-[10px] font-bold uppercase tracking-widest ${ticket.applicationStatus === 'shortlisted' ? 'text-green-400' :
-                                    ticket.applicationStatus === 'rejected' ? 'text-red-400' : 'text-yellow-400'
-                                    }`}>
-                                    {ticket.applicationStatus || 'Pending'}
-                                </span>
-                            </div>
-                            {ticket.applicationStatus === 'shortlisted' && (
-                                <div className="text-[10px] text-green-400/80 leading-tight">
-                                    Congratulations! You've been shortlisted.
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Registration Details Display */}
-                        <div className="mt-3 bg-dark-900/50 p-2 rounded border border-white/5 space-y-1">
-                            <div className="flex justify-between items-center text-[10px] text-gray-500">
-                                <span className="uppercase tracking-wider">Registration Data</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mt-1">
-                                {ticket.registrationData?.age && (
-                                    <div className="text-[10px] text-gray-400">
-                                        <span className="text-gray-600 block text-[8px] uppercase">Age</span>
-                                        {ticket.registrationData.age}
-                                    </div>
-                                )}
-                                {ticket.registrationData?.phone && (
-                                    <div className="text-[10px] text-gray-400">
-                                        <span className="text-gray-600 block text-[8px] uppercase">Phone</span>
-                                        {ticket.registrationData.phone}
-                                    </div>
-                                )}
-                            </div>
-                            {ticket.registrationData?.profilePhoto && (
-                                <div className="mt-1 pt-1 border-t border-white/5">
-                                    <a
-                                        href={`http://localhost:4005${ticket.registrationData.profilePhoto}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[10px] text-secondary-500 hover:text-secondary-400 flex items-center gap-1"
-                                    >
-                                        <span>📷</span> View Submitted Photo
-                                    </a>
-                                </div>
-                            )}
-                            {ticket.registrationData?.birthCertificate && (
-                                <div className="mt-1">
-                                    <a
-                                        href={`http://localhost:4005${ticket.registrationData.birthCertificate}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1"
-                                    >
-                                        <span>📄</span> View Birth Certificate
-                                    </a>
-                                </div>
-                            )}
-                            {ticket.registrationData?.video && (
-                                <div className="mt-1">
-                                    <a
-                                        href={`http://localhost:4005${ticket.registrationData.video}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1"
-                                    >
-                                        <span>🎥</span> Watch Audition Video
-                                    </a>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-3 mt-auto pt-3 border-t border-white/5">
-                            <div className="w-6 h-6 rounded-full border border-secondary-500/50 p-0.5 shrink-0">
-                                <img src={user?.photo && user?.photo !== 'default.jpg' ? `/img/users/${user.photo}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`} alt="User" className="w-full h-full rounded-full bg-dark-700 object-cover" />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Attendee</p>
-                                <p className="text-white text-xs font-medium truncate">{user?.name}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Section: Stub & QR */}
-                    <div className="sm:w-40 bg-dark-900/50 p-4 flex flex-col items-center justify-center border-t sm:border-t-0 sm:border-l border-white/5 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-dark-800 to-dark-900">
-                        <div className="bg-white p-1.5 rounded-md mb-2">
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticket.qrCode}`}
-                                alt="QR"
-                                className="w-16 h-16 mix-blend-multiply"
-                            />
-                        </div>
-                        <p className="font-mono text-secondary-400 text-[10px] tracking-widest mb-0.5">{ticket.ticketNumber.slice(-6)}</p>
-
-                        <div className="mt-2 text-center">
-                            <p className="text-lg font-display font-bold text-white">₹{ticket.price}</p>
-                        </div>
-                    </div>
-                </div>
-            </motion.div >
-        );
+    const handleFlip = (e) => {
+        e.stopPropagation();
+        setIsFlipped(!isFlipped);
     }
 
-    // MEMBERSHIP CARD LAYOUT (Animated Holographic 3D)
+    // Image URL Helper
+    const getPhotoUrl = (path) => {
+        if (!path) return `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`;
+        if (path.startsWith('http')) return path;
+        return `/img/users/${path}`;
+    };
+
     return (
         <motion.div
-            initial={{ rotateY: 90, opacity: 0 }}
-            animate={{ rotateY: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
-            className="perspective-1000 w-full max-w-[300px] mx-auto font-sans"
-            style={{ perspective: "1000px" }} // Ensure 3D perspective
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="perspective-1000 w-full max-w-[320px] mx-auto font-sans h-[500px]"
+            style={{ perspective: "1000px" }}
         >
             <motion.div
                 ref={cardRef}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
+                onClick={isEventTicket ? onClick : handleFlip} // Event: open modal on click? User said "same type of card", maybe flip too? Let's make clicking the "Flip Button" flip it, and clicking card open modal? Or click card to flip? User requirement: "QR on back". Usually card flip is interaction.
+                // Let's make the card FLIP on click for the QR code view as requested.
+                // But for events we usually want "Details". 
+                // Let's add a "Flip" button in the corner, or just click to flip. For Events, we need to open details modal.
+                // I will add a small button to Flip, or make the whole card flip.
+                // If I click to flip, how do I view details?
+                // I'll make the whole card flip on click. And maybe a button "View Details" on the back?
+                // Actually, for Membership card, flipping is the primary interaction.
+                // For Event card, `onClick` passed from parent usually opens `TicketDetailsModal`.
+                // I'll wrap the logic: Click = Flip. Inside Back of card = Button to "View Details" (for events).
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
                 style={{
-                    rotateX,
-                    rotateY,
+                    rotateX: isEventTicket ? 0 : rotateX,
                     transformStyle: "preserve-3d",
                 }}
-                className="relative w-full aspect-[1/1.6] rounded-xl cursor-default"
+                className="relative w-full h-full cursor-pointer"
             >
-                {/* Visual Card Container */}
-                <div className="absolute inset-0 bg-dark-900 rounded-xl overflow-hidden shadow-2xl border border-gold/30 flex flex-col backface-hidden">
-                    {/* Holographic Sheen Overlay */}
-                    <motion.div
-                        className="absolute inset-0 z-20 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"
-                        style={{
-                            x: useTransform(x, [-0.5, 0.5], ["100%", "-100%"]),
-                            y: useTransform(y, [-0.5, 0.5], ["100%", "-100%"]),
-                            opacity: useTransform(mouseXSpring, [-0.5, 0, 0.5], [0, 0.3, 0]),
-                        }}
-                    />
-
-                    {/* Golden Noise Texture */}
+                {/* --- FRONT OF CARD --- */}
+                <div
+                    className="absolute inset-0 bg-dark-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col"
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                >
+                    {/* Background & Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-dark-800 to-black z-0" />
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] z-0"></div>
 
-                    {/* Reflected Light sheen on edges */}
-                    <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10 z-30"></div>
-
-                    {/* Header */}
-                    <div className="bg-gradient-to-b from-dark-800 to-dark-900 p-6 text-center relative z-10 border-b border-white/5">
-                        <div className="inline-block px-3 py-0.5 border border-gold/50 rounded-full text-gold text-[8px] font-bold tracking-[0.2em] uppercase mb-3 shadow-[0_0_10px_rgba(212,175,55,0.3)]">
-                            Elite Member
-                        </div>
-                        <motion.div
-                            className="w-20 h-20 mx-auto rounded-full p-[2px] bg-gradient-to-br from-gold via-white to-gold shadow-lg shadow-gold/20 mb-3"
-                            style={{ translateZ: "20px" }} // Pop out effect
-                        >
-                            <img
-                                src={user?.photo && user?.photo !== 'default.jpg' ? `/img/users/${user.photo}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
-                                alt="Profile"
-                                className="w-full h-full rounded-full bg-dark-900 object-cover"
-                            />
-                        </motion.div>
-                        <motion.h2 style={{ translateZ: "10px" }} className="text-lg font-display font-bold text-white tracking-wide truncate px-2">{user?.name}</motion.h2>
-                        <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-1">{user?.role || 'Member'}</p>
-                    </div>
-
                     {/* Content */}
-                    <div className="flex-1 p-6 flex flex-col items-center justify-between relative z-10">
-                        <div className="w-full space-y-2">
-                            <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Status</span>
-                                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Since</span>
-                                <span className="text-[10px] text-white font-mono">{new Date(user?.createdAt).getFullYear() || '2026'}</span>
-                            </div>
+                    <div className="relative z-10 flex flex-col h-full bg-dark-900">
+                        {/* Header Image / Badge */}
+                        <div className="h-1/3 relative overflow-hidden bg-dark-950">
+                            {isEventTicket ? (
+                                <img src={ticket.event.imageCover || ticket.event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"} alt="Event" className="w-full h-full object-cover opacity-90" />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-b from-secondary-900/40 to-dark-900 flex items-center justify-center">
+                                    <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-br from-gold via-white to-gold shadow-lg shadow-gold/20 z-10">
+                                        <img src={getPhotoUrl(user?.photo)} alt="User" className="w-full h-full rounded-full object-cover bg-dark-900" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {!isEventTicket && (
+                                <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 border border-gold/50 rounded-full text-gold text-[10px] font-bold uppercase tracking-widest backdrop-blur-md shadow-sm z-20">
+                                    Elite Member
+                                </div>
+                            )}
                         </div>
 
-                        <div className="mt-4 text-center">
-                            <motion.div style={{ translateZ: "15px" }} className="bg-white p-1.5 rounded-lg inline-block shadow-lg">
-                                <img
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticket.qrCode}`}
-                                    alt="QR"
-                                    className="w-16 h-16 block mix-blend-multiply"
-                                />
-                            </motion.div>
-                            <p className="mt-2 text-[10px] font-mono text-gold/80 tracking-widest">{ticket.ticketNumber}</p>
+                        {/* Body Details */}
+                        <div className="flex-1 p-5 flex flex-col items-center text-center bg-dark-900">
+                            {isEventTicket ? (
+                                <>
+                                    <h3 className="text-xl font-display font-bold text-white mb-1 line-clamp-2">{ticket.event.title}</h3>
+                                    <p className="text-secondary-400 text-xs font-bold uppercase tracking-widest mb-4">Official Event Pass</p>
+
+                                    <div className="w-full space-y-3 mt-2 bg-white/5 p-3 rounded-lg border border-white/5">
+                                        <div className="flex justify-between border-b border-white/10 pb-2">
+                                            <span className="text-gray-500 text-xs uppercase">Date</span>
+                                            <span className="text-white text-xs font-bold">{new Date(ticket.event.startDate).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500 text-xs uppercase">Status</span>
+                                            <span className={`text-xs font-bold uppercase ${ticket.applicationStatus === 'shortlisted' ? 'text-green-400' : 'text-yellow-400'}`}>
+                                                {ticket.applicationStatus || 'Pending'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className="text-2xl font-display font-bold text-white mb-1">{user?.name}</h3>
+                                    <p className="text-gray-500 text-xs uppercase tracking-widest mb-4">{user?.role || 'Member'}</p>
+
+                                    <div className="w-full space-y-2 text-left bg-white/5 p-4 rounded-xl border border-white/5 shadow-inner">
+                                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Email</span>
+                                            <span className="text-white text-[10px] truncate max-w-[140px] font-mono">{user?.email}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wider font-bold">DOB</span>
+                                            <span className="text-white text-[10px] font-mono">{user?.dob ? new Date(user.dob).toLocaleDateString() : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wider font-bold">Gender</span>
+                                            <span className="text-white text-[10px] capitalize font-mono">{user?.gender || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="p-3 text-center border-t border-white/10 bg-dark-800">
+                            <span className="text-[10px] text-secondary-400 uppercase tracking-widest font-bold flex items-center justify-center gap-2">
+                                <span>↻</span> Click Card to Flip
+                            </span>
                         </div>
                     </div>
+                </div>
+
+                {/* --- BACK OF CARD (QR CODE) --- */}
+                <div
+                    className="absolute inset-0 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center justify-center p-6 text-center border-4 border-gold"
+                    style={{
+                        transform: "rotateY(180deg)",
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        zIndex: 1 // Ensure stacking context
+                    }}
+                >
+                    <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-dark-900 to-transparent opacity-10"></div>
+
+                    <h3 className="text-dark-900 font-display font-bold text-xl mb-1 uppercase tracking-widest">
+                        {isEventTicket ? "Entry Pass" : "Identity"}
+                    </h3>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-6">Scan for Verification</p>
+
+                    <div className="bg-white p-3 rounded-xl border-2 border-dark-900 shadow-2xl mb-6">
+                        <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${ticket.qrCode}`}
+                            alt="QR Code"
+                            className="w-48 h-48 block mix-blend-multiply"
+                        />
+                    </div>
+
+                    <div className="font-mono text-dark-900 bg-gray-100 px-4 py-2 rounded-lg text-sm font-bold tracking-[0.2em] border border-gray-300">
+                        {ticket.ticketNumber}
+                    </div>
+
+                    {isEventTicket && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onClick(); }}
+                            className="mt-6 px-6 py-2 bg-dark-900 text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-secondary-600 transition shadow-lg"
+                        >
+                            Open Details
+                        </button>
+                    )}
                 </div>
             </motion.div>
         </motion.div>

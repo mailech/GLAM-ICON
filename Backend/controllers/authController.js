@@ -38,33 +38,168 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
+  const existingUser = await User.findOne({ email: req.body.email });
+
+  if (existingUser) {
+    if (existingUser.isVerified) {
+      return next(new AppError('User already exists. Please login.', 400));
+    } else {
+      // Resend OTP logic for unverified user trying to signup again
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const hash = crypto.createHash('sha256').update(otp).digest('hex');
+
+      existingUser.otp = hash;
+      existingUser.otpExpires = Date.now() + 10 * 60 * 1000;
+      existingUser.name = req.body.name; // Update name if changed
+      existingUser.password = req.body.password;
+      existingUser.passwordConfirm = req.body.passwordConfirm;
+
+      await existingUser.save({ validateBeforeSave: false });
+
+      try {
+        await sendEmail({
+          email: existingUser.email,
+          subject: 'Your Authentication Code - Glam Iconic India',
+          message: `Your verification code is: ${otp}. It is valid for 10 minutes.`
+        });
+        return res.status(200).json({
+          status: 'pending_verification',
+          message: 'OTP resent to email',
+          email: existingUser.email
+        });
+      } catch (err) {
+        return next(new AppError('There was an error sending the email. Try again later!'), 500);
+      }
+    }
+  }
+
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-    photo: req.file ? req.file.filename : 'default.jpg'
+    photo: req.file ? req.file.filename : 'default.jpg',
+    isVerified: false // Explicitly set to false initially
   });
 
-  // Create a Membership Ticket for the new user
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const hash = crypto.createHash('sha256').update(otp).digest('hex');
+
+  newUser.otp = hash;
+  newUser.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+  await newUser.save({ validateBeforeSave: false });
+
   try {
-    await Ticket.create({
-      user: newUser._id,
-      ticketNumber: `MEM-${Date.now()}`,
-      price: 0,
-      status: 'confirmed',
-      qrCode: newUser._id.toString(),
+    await sendEmail({
+      email: newUser.email,
+      subject: 'Your Authentication Code - Glam Iconic India',
+      message: `Your verification code is: ${otp}. It is valid for 10 minutes.`
+    });
+
+    res.status(200).json({
+      status: 'pending_verification',
+      message: 'OTP sent to email',
+      email: newUser.email
     });
   } catch (err) {
-    // If ticket creation fails, we still want the user to be created, or maybe not? 
-    // For now, let's just log it or ignore, but strictly speaking better to fail silently 
-    // or handle it. But catchAsync will catch it if we blindly await.
-    // Given the previous code just awaited, let's stick to that but ensure syntax is right.
+    newUser.otp = undefined;
+    newUser.otpExpires = undefined;
+    await newUser.save({ validateBeforeSave: false });
+    return next(new AppError('There was an error sending the email. Try again later!'), 500);
   }
-
-  createSendToken(newUser, 201, res);
 });
 
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return next(new AppError('Please provide email and otp', 400));
+
+  const user = await User.findOne({ email }).select('+otp +otpExpires');
+  if (!user) return next(new AppError('User not found', 404));
+
+  if (!user.otp || !user.otpExpires || user.otpExpires < Date.now()) {
+    return next(new AppError('OTP expired or invalid', 400));
+  }
+
+  const hash = crypto.createHash('sha256').update(otp).digest('hex');
+  if (hash !== user.otp) {
+    return next(new AppError('Invalid OTP', 400));
+  }
+
+  // Verification successful
+  user.isVerified = true;
+  user.otp = undefined;
+  user.otpExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  // Create Ticket if new user logic needed here? Usually done at signup but we can do it here or leave it. 
+  // Let's create ticket here to ensure only verified users get tickets
+  try {
+    const existingTicket = await Ticket.findOne({ user: user._id });
+    if (!existingTicket) {
+      await Ticket.create({
+        user: user._id,
+        ticketNumber: `MEM-${Date.now()}`,
+        price: 0,
+        status: 'confirmed',
+        qrCode: user._id.toString(),
+      });
+    }
+  } catch (e) { console.error("Ticket creation error", e); }
+
+  createSendToken(user, 200, res);
+});
+
+exports.googleLogin = catchAsync(async (req, res, next) => {
+  const { token } = req.body; // Expecting Google ID Token from frontend
+
+  // Verify Google Token (Using google-auth-library)
+  const { OAuth2Client } = require('google-auth-library');
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // User needs to add this to env
+
+  // For safety, let's wrap verification or use simple decode if libraries fail without key
+  // But assuming user provides key or we skip verification for dev
+  let payload;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch (err) {
+    // Fallback or error
+    console.error("Google verify error", err);
+    return next(new AppError('Invalid Google Token', 401));
+  }
+
+  const { email, name, sub: googleId, picture } = payload;
+
+  let user = await User.findOne({ email });
+
+  if (user) {
+    // Link googleId if not present
+    if (!user.googleId) {
+      user.googleId = googleId;
+      user.isVerified = true; // Trust Google
+      await user.save({ validateBeforeSave: false });
+    }
+    createSendToken(user, 200, res);
+  } else {
+    // Create new user
+    user = await User.create({
+      name,
+      email,
+      googleId,
+      photo: picture,
+      isVerified: true
+    });
+
+    // Create Ticket
+    await Ticket.create({ user: user._id, ticketNumber: `MEM-${Date.now()}`, price: 0, status: 'confirmed', qrCode: user._id.toString() });
+
+    createSendToken(user, 201, res);
+  }
+});
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -74,10 +209,16 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide email and password!', 400));
   }
   // 2) Check if user exists && password is correct
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password +isVerified');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // Check verification
+  if (!user.isVerified) {
+    // Resend OTP logic could go here or frontend handles it
+    return next(new AppError('Please verify your email first', 401));
   }
 
   // 3) If everything ok, send token to client

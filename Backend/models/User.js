@@ -17,10 +17,17 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: [function () { return !this.googleId; }, 'Please provide a password'], // Only required if not google login
     minlength: 8,
     select: false
   },
+  googleId: String,
+  isVerified: {
+    type: Boolean,
+    default: function () { return !!this.googleId; } // Google users verified by default
+  },
+  otp: String,
+  otpExpires: Date,
   photo: {
     type: String,
     default: 'default.jpg'
@@ -36,6 +43,8 @@ const userSchema = new mongoose.Schema({
     default: 'Glamor Enthusiast'
   },
   phone: String,
+  dob: Date, // Date of Birth
+  age: Number,
   gender: {
     type: String,
     enum: ['Male', 'Female', 'Other', 'Prefer not to say'],

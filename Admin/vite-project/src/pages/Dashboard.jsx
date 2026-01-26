@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 
 const Dashboard = () => {
     const [tickets, setTickets] = useState([]);
+    const [stats, setStats] = useState({ total: 0, pending: 0, shortlisted: 0, rejected: 0 });
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, pending, shortlisted, rejected
     const [page, setPage] = useState(1);
@@ -11,14 +12,32 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchTickets();
+        fetchStats();
     }, [page]);
+
+    const fetchStats = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const res = await axios.get('/api/tickets/admin/stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.status === 'success') {
+                setStats(res.data.data.stats);
+            }
+        } catch (err) {
+            console.error("Failed to fetch stats", err);
+        }
+    }
 
     const fetchTickets = async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            // If no token, redirect to login (handled by parent or axios interceptor usually, but here manual check)
+            console.log("Fetching tickets with token:", token);
+
             if (!token) {
+                console.warn("No token found, redirecting...");
                 window.location.href = '/login';
                 return;
             }
@@ -26,11 +45,20 @@ const Dashboard = () => {
             const res = await axios.get(`/api/tickets/admin/all?sort=-createdAt&page=${page}&limit=20`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            console.log("API Response:", res.data);
+
             if (res.data && res.data.data && res.data.data.data) {
+                console.log("Setting tickets:", res.data.data.data);
                 setTickets(res.data.data.data);
+            } else {
+                console.warn("Unexpected API structure:", res.data);
             }
         } catch (err) {
             console.error("Failed to fetch tickets", err);
+            if (err.response) {
+                console.error("Error Response:", err.response.status, err.response.data);
+            }
             if (err.response && err.response.status === 401) {
                 window.location.href = '/login';
             }
@@ -52,10 +80,13 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Optimistic update
+            // Optimistic update for the table
             setTickets(tickets.map(t =>
                 t._id === ticketId ? { ...t, applicationStatus: status, adminFeedback: feedback } : t
             ));
+
+            // Refresh stats to ensure accuracy
+            fetchStats();
         } catch (err) {
             console.error("Update failed", err);
             alert("Failed to update status");
@@ -70,8 +101,17 @@ const Dashboard = () => {
     const getMediaUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
+
+        // Handle Backslashes (Windows paths stored in DB)
+        const normalizedUrl = url.replace(/\\/g, '/');
+
         // Clean up any double slashes just in case
-        const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+        const cleanUrl = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+
+        // If it looks like a Cloudinary path or we want to be safe
+        if (cleanUrl.includes('cloudinary')) return url; // Should have been caught by startsWith http
+
+        // Local Fallback
         if (cleanUrl.startsWith('/uploads/')) return `http://localhost:4005${cleanUrl}`;
         return `http://localhost:4005/uploads${cleanUrl}`;
     };
@@ -85,8 +125,20 @@ const Dashboard = () => {
 
     if (loading && tickets.length === 0) return <div className="text-white text-center pt-20">Loading Admin Dashboard...</div>;
 
+    const StatsCard = ({ title, value, color, icon }) => (
+        <div className="bg-dark-800 p-6 rounded-xl border border-white/5 shadow-xl flex items-center justify-between group hover:border-white/10 transition-all">
+            <div>
+                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">{title}</p>
+                <h3 className={`text-4xl font-display font-bold ${color}`}>{value}</h3>
+            </div>
+            <div className={`text-2xl opacity-20 group-hover:opacity-100 transition-opacity ${color}`}>
+                {icon}
+            </div>
+        </div>
+    );
+
     return (
-        <div className="min-h-screen bg-dark-900 text-white p-6 relative">
+        <div className="min-h-screen bg-dark-900 text-white p-4 md:p-6 relative">
             {/* Media Viewer Modal */}
             {selectedMedia && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onClick={() => setSelectedMedia(null)}>
@@ -101,7 +153,7 @@ const Dashboard = () => {
                         <div className="flex justify-center items-center bg-black min-h-[50vh] max-h-[80vh]">
                             {selectedMedia.type === 'video' ? (
                                 <video controls autoPlay className="max-w-full max-h-[80vh]">
-                                    <source src={getMediaUrl(selectedMedia.url)} type="video/mp4" />
+                                    <source src={getMediaUrl(selectedMedia.url)} />
                                     Your browser does not support the video tag.
                                 </video>
                             ) : (
@@ -127,19 +179,33 @@ const Dashboard = () => {
             )}
 
             <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
                     <div>
-                        <h1 className="text-3xl font-display font-bold">Admin Portal</h1>
-                        <p className="text-gray-400 text-xs uppercase tracking-widest">Glam Icon India</p>
+                        <h1 className="text-2xl md:text-3xl font-display font-bold">Admin Portal</h1>
+                        <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-widest">Glam Iconic India</p>
                     </div>
 
-                    <div className="flex gap-4 items-center">
-                        <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-start sm:items-center">
+                        {/* Stats Summary - Mini */}
+                        <div className="flex gap-6 md:mr-8 md:border-r border-white/10 md:pr-8 w-full md:w-auto justify-between md:justify-end">
+                            <div className="text-left md:text-right">
+                                <span className="block text-xl md:text-2xl font-bold text-white">{stats.total}</span>
+                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">Total</span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="sm:hidden px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
+                            >
+                                Logout
+                            </button>
+                        </div>
+
+                        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
                             {['all', 'pending', 'shortlisted', 'rejected'].map(f => (
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
-                                    className={`px-4 py-2 rounded uppercase text-xs font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'bg-dark-800 text-gray-400 hover:text-white'}`}
+                                    className={`whitespace-nowrap px-4 py-2 rounded uppercase text-[10px] md:text-xs font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'bg-dark-800 text-gray-400 hover:text-white'}`}
                                 >
                                     {f}
                                 </button>
@@ -147,14 +213,78 @@ const Dashboard = () => {
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
+                            className="hidden sm:block px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
                         >
                             Logout
                         </button>
                     </div>
                 </div>
 
-                <div className="bg-dark-800 rounded-xl border border-white/5 overflow-hidden">
+                {/* --- ANALYTICS CARDS --- */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    <StatsCard title="Total" value={stats.total} color="text-white" icon="📋" />
+                    <StatsCard title="Pending" value={stats.pending} color="text-yellow-400" icon="⏳" />
+                    <StatsCard title="Shortlisted" value={stats.shortlisted} color="text-green-400" icon="✨" />
+                    <StatsCard title="Rejected" value={stats.rejected} color="text-red-400" icon="🚫" />
+                </div>
+
+                {/* Mobile Card View (Visible only on small screens) */}
+                <div className="md:hidden flex flex-col gap-4">
+                    {filteredTickets.map(ticket => (
+                        <div key={ticket._id} className="bg-dark-800 p-5 rounded-xl border border-white/5 relative">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <span className="text-[10px] font-mono text-secondary-400 block mb-1">{ticket.ticketNumber}</span>
+                                    <h3 className="font-bold text-lg">{ticket.user?.name || 'Unknown'}</h3>
+                                    <p className="text-xs text-gray-500">{ticket.event?.title}</p>
+                                </div>
+                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${ticket.applicationStatus === 'shortlisted' ? 'bg-green-500/20 text-green-400' :
+                                    ticket.applicationStatus === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                                        'bg-yellow-500/20 text-yellow-400'
+                                    }`}>
+                                    {ticket.applicationStatus || 'Pending'}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-400 mb-4 bg-dark-900/50 p-3 rounded-lg">
+                                {ticket.registrationData?.age && <div>Age: <span className="text-white">{ticket.registrationData.age}</span></div>}
+                                {ticket.registrationData?.height && <div>Height: <span className="text-white">{ticket.registrationData.height}</span></div>}
+                                <div className="col-span-2 truncate">{ticket.user?.email}</div>
+                                {ticket.registrationData?.phone && <div className="col-span-2">{ticket.registrationData?.phone}</div>}
+                            </div>
+
+                            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                                {ticket.registrationData?.profilePhoto && (
+                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.profilePhoto })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">📷 Photo</button>
+                                )}
+                                {ticket.registrationData?.video && (
+                                    <button onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.video })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">🎥 Video</button>
+                                )}
+                                {ticket.registrationData?.birthCertificate && (
+                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.birthCertificate })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">📄 Cert</button>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => updateStatus(ticket._id, 'shortlisted')}
+                                    className="py-2 bg-green-600 text-white rounded text-xs font-bold uppercase hover:bg-green-500"
+                                >
+                                    Shortlist
+                                </button>
+                                <button
+                                    onClick={() => updateStatus(ticket._id, 'rejected')}
+                                    className="py-2 bg-red-600/20 border border-red-600/50 text-red-500 rounded text-xs font-bold uppercase hover:bg-red-600/30"
+                                >
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop Table View (Hidden on mobile) */}
+                <div className="hidden md:block bg-dark-800 rounded-xl border border-white/5 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>

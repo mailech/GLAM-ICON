@@ -55,7 +55,10 @@ const ticketSchema = new mongoose.Schema({
     video: String,
     age: Number,
     height: String,
-    measurements: String
+    measurements: String,
+    name: String,
+    email: String,
+    phone: String
   },
   applicationStatus: {
     type: String,
@@ -82,7 +85,7 @@ ticketSchema.pre('save', async function (next) {
 
 // Query middleware to only find active tickets
 ticketSchema.pre(/^find/, function (next) {
-  this.find({ isActive: { $ne: false } });
+  // this.find({ isActive: { $ne: false } });
   next();
 });
 

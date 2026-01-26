@@ -7,6 +7,21 @@ const Layout = () => {
   const location = useLocation();
   const token = localStorage.getItem('token');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle Scroll to Top on route change
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -18,9 +33,9 @@ const Layout = () => {
 
   const NavLink = ({ to, children, mobile = false }) => {
     const isActive = location.pathname === to;
-    const baseClasses = "text-xs font-bold uppercase tracking-widest transition duration-300";
+    const baseClasses = "text-xs font-bold uppercase tracking-widest transition duration-300 relative group";
     const activeClasses = "text-white";
-    const inactiveClasses = "text-gray-400 hover:text-white";
+    const inactiveClasses = "text-gray-300 hover:text-white";
     const mobileClasses = "block py-4 text-center text-sm border-b border-white/5 w-full";
 
     return (
@@ -30,19 +45,22 @@ const Layout = () => {
         className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses} ${mobile ? mobileClasses : ''}`}
       >
         {children}
+        {!mobile && (
+          <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary-500 transition-all duration-300 group-hover:w-full ${isActive ? 'w-full' : ''}`}></span>
+        )}
       </Link>
     );
   };
 
   return (
     <div className="min-h-screen bg-dark-900 text-gray-100 font-sans relative flex flex-col">
-      <header className="fixed top-0 left-0 w-full z-50">
-        <nav className="bg-dark-900/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled ? 'bg-dark-900/80 backdrop-blur-xl border-b border-white/5 py-4 shadow-lg' : 'bg-transparent py-6'}`}>
+        <nav className="px-6">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
 
             <Link to="/" className="text-2xl font-display font-bold text-white tracking-widest uppercase flex items-center gap-2 z-50 relative">
               <span className="w-2 h-8 bg-secondary-500 block"></span>
-              GLAM ICON INDIA
+              GLAM ICONIC INDIA
             </Link>
 
             {/* Desktop Menu */}
@@ -51,7 +69,6 @@ const Layout = () => {
               {token ? (
                 <>
                   <NavLink to="/profile">Profile</NavLink>
-                  <NavLink to="/admin">Admin</NavLink>
                   <button
                     onClick={handleLogout}
                     className="px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/10 transition text-white"
@@ -136,7 +153,7 @@ const Layout = () => {
           <div className="space-y-6">
             <Link to="/" className="text-2xl font-display font-bold text-white tracking-widest uppercase flex items-center gap-2">
               <span className="w-1.5 h-6 bg-secondary-500 block"></span>
-              GLAM ICON INDIA
+              GLAM ICONIC INDIA
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed font-light">
               India's premier digital platform for the fashion elite.
@@ -192,7 +209,7 @@ const Layout = () => {
         </div>
 
         <div className="max-w-7xl mx-auto border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600 uppercase tracking-wider">
-          <p>&copy; 2026 Glam Icon India. All rights reserved.</p>
+          <p>&copy; 2026 Glam Iconic India. All rights reserved.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition">Privacy Policy</a>
             <a href="#" className="hover:text-white transition">Terms of Service</a>

@@ -4,36 +4,40 @@ const AppError = require('../utils/appError');
 const multer = require('multer');
 const sharp = require('sharp');
 
-// Simple Multer storage/filtering (memory storage for Sharp processing)
-const multerStorage = multer.memoryStorage();
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const multerFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image')) {
-        cb(null, true);
-    } else {
-        cb(new AppError('Not an image! Please upload only images.', 400), false);
-    }
-};
-
-const upload = multer({
-    storage: multerStorage,
-    fileFilter: multerFilter
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'users',
+        format: async (req, file) => 'jpeg', // supports promises as well
+        public_id: (req, file) => {
+            const userId = req.user ? req.user.id : `new-${Date.now()}`;
+            return `user-${userId}-${Date.now()}`;
+        },
+        transformation: [{ width: 500, height: 500, crop: 'limit' }]
+    },
+});
+
+const upload = multer({ storage: storage });
 
 exports.uploadUserPhoto = upload.single('photo');
 
+// Resizing is handled by Cloudinary, so this middleware is just a pass-through or sets filename correctly
 exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
     if (!req.file) return next();
-
-    const userId = req.user ? req.user.id : `new-${Date.now()}`;
-    req.file.filename = `user-${userId}-${Date.now()}.jpeg`;
-
-    await sharp(req.file.buffer)
-        .resize(500, 500)
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`public/img/users/${req.file.filename}`);
-
+    req.file.filename = req.file.path.split('/').pop(); // Cloudinary returns full URL in path, or filename. 
+    // Actually multer-storage-cloudinary sets req.file.filename to the public_id usually. 
+    // But our User model expects a filename to be stored? 
+    // Use req.file.filename which usually holds the public_id. 
+    // Let's ensure consistency. If `req.file.filename` is set by the storage engine, we are good.
     next();
 });
 
@@ -62,8 +66,16 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     }
 
     // 2) Filtered out unwanted field names that are not allowed to be updated
-    const filteredBody = filterObj(req.body, 'name', 'email', 'bio', 'phone', 'gender', 'socialLinks');
+    const filteredBody = filterObj(req.body, 'name', 'email', 'bio', 'phone', 'gender', 'socialLinks', 'dob');
     if (req.file) filteredBody.photo = req.file.filename;
+
+    // Calculate Age if DOB is present
+    if (filteredBody.dob) {
+        const birthDate = new Date(filteredBody.dob);
+        const ageDifMs = Date.now() - birthDate.getTime();
+        const ageDate = new Date(ageDifMs); // miliseconds from epoch
+        filteredBody.age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    }
 
     // 3) Update user document
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {

@@ -50,7 +50,8 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
         } catch (err) {
             console.error('Upload failed', err);
             setUploading(false);
-            alert('File upload failed. Please try again.');
+            const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+            alert(`File upload failed: ${errorMsg}`);
             return null;
         }
     };

@@ -19,6 +19,7 @@ router
 
 // Admin routes
 // router.use(authController.restrictTo('admin'));
+router.route('/admin/stats').get(ticketController.getTicketStats);
 router.route('/admin/all').get(ticketController.getAllTickets);
 
 module.exports = router;

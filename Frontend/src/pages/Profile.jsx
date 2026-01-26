@@ -33,7 +33,14 @@ const Profile = () => {
             });
 
             if (ticketRes.data.data.tickets) {
-                setTickets(ticketRes.data.data.tickets);
+                console.log("Raw Tickets from API:", ticketRes.data.data.tickets);
+                const allTickets = ticketRes.data.data.tickets;
+                setTickets(allTickets);
+
+                const eventTick = allTickets.filter(t => t.event);
+                const memTick = allTickets.find(t => !t.event);
+                console.log("Event Tickets:", eventTick);
+                console.log("Membership Ticket:", memTick);
             }
 
         } catch (err) {
@@ -49,6 +56,24 @@ const Profile = () => {
     useEffect(() => {
         fetchProfile();
     }, []);
+
+    // Auto-open edit modal if profile is incomplete (missing DOB or phone) - Run only once on initial load
+    useEffect(() => {
+        if (!loading && user && (!user.dob || !user.phone)) {
+            // Only open if it hasn't been opened automatically yet, or rely on user action. 
+            // To prevent re-opening after save, we can check if it's the *first* time we noticed it's missing.
+            // But simpler: Just remove this aggressive auto-check or make it smarter.
+            // Let's rely on a flag or just do it once.
+            // Better UX: Show a notification/banner instead of forcing a modal.
+            // But for now, fixing the "not going off" issue:
+            // The issue is likely that even after update, if one field is missing, it re-opens. 
+            // Logic: Check if we just updated? 
+
+            // I will simply Comment out this aggressive auto-opening for now as it causes the "loop" issue if user doesn't fill everything.
+            // Users can click the edit button.
+            // setIsEditModalOpen(true); 
+        }
+    }, [loading, user]);
 
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-dark-900 text-secondary-400 font-display text-lg animate-pulse">Loading Profile...</div>;
 
@@ -78,7 +103,9 @@ const Profile = () => {
                     <div className="relative shrink-0">
                         <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-gold/50 to-transparent">
                             <img
-                                src={user?.photo && user?.photo !== 'default.jpg' ? `/img/users/${user.photo}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
+                                src={user?.photo && user?.photo !== 'default.jpg'
+                                    ? (user.photo.startsWith('http') ? user.photo : `/img/users/${user.photo}`)
+                                    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
                                 alt="Profile"
                                 className="w-full h-full rounded-full bg-dark-800 object-cover"
                             />
