@@ -102,6 +102,39 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+// Create Admin Route (Temporary)
+app.get('/api/create-admin', async (req, res) => {
+  try {
+    await connectDB();
+    const User = require('./models/User');
+    const email = 'admin@glamicon.io';
+    let user = await User.findOne({ email });
+
+    if (user) {
+      user.password = 'password1234';
+      user.role = 'admin';
+      await user.save({ validateBeforeSave: false }); // Force update
+      return res.json({ status: 'success', message: 'Admin Updated', email });
+    }
+
+    const year = new Date().getFullYear();
+    const random = Math.floor(10000 + Math.random() * 90000);
+
+    user = await User.create({
+      name: 'Glam Admin',
+      email,
+      password: 'password1234',
+      role: 'admin',
+      isVerified: true,
+      memberId: `GII-${year}-${random}`
+    });
+
+    res.json({ status: 'success', message: 'Admin Created', email });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('ERROR 💥:', err);
