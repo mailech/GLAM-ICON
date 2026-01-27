@@ -8,33 +8,43 @@ const catchAsync = require('../utils/catchAsync');
 const sendEmail = require('../utils/email');
 
 const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+  const secret = process.env.JWT_SECRET || 'supersecretkeylearning';
+  const expiresIn = process.env.JWT_EXPIRES_IN || '90d';
+  return jwt.sign({ id }, secret, {
+    expiresIn: expiresIn
   });
 };
 
 const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
-  };
+  try {
+    const token = signToken(user._id);
+    const cookieExpires = process.env.JWT_COOKIE_EXPIRES_IN || 90;
 
-  // Remove password from output
-  user.password = undefined;
+    const cookieOptions = {
+      expires: new Date(
+        Date.now() + cookieExpires * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    };
 
-  res.cookie('jwt', token, cookieOptions);
+    // Remove password from output
+    user.password = undefined;
 
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user
-    }
-  });
+    res.cookie('jwt', token, cookieOptions);
+
+    res.status(statusCode).json({
+      status: 'success',
+      token,
+      data: {
+        user
+      }
+    });
+  } catch (err) {
+    console.error("CREATE SEND TOKEN ERROR:", err);
+    // Don't crash, just send json response error
+    res.status(500).json({ status: 'error', message: 'Token creation failed: ' + err.message });
+  }
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
