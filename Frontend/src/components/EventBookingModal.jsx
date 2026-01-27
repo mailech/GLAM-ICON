@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/axios';
 
 const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
     const [step, setStep] = useState(1);
@@ -42,7 +42,7 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
 
         try {
             setUploading(true);
-            const res = await axios.post('/api/upload', data, {
+            const res = await api.post('/api/upload', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setUploading(false);
