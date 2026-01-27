@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -35,6 +36,21 @@ const Login = () => {
         setLoading(false);
     };
 
+    const handleGoogleLogin = async (credentialResponse) => {
+        try {
+            setLoading(true);
+            const { credential } = credentialResponse;
+            const res = await api.post('/api/users/google', { token: credential });
+            localStorage.setItem('token', res.data.token);
+            navigate('/profile');
+        } catch (err) {
+            console.error("Google login failed", err);
+            setError("Google Login failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center px-4 bg-[url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center relative">
             <div className="absolute inset-0 bg-dark-900/90"></div>
@@ -49,6 +65,23 @@ const Login = () => {
                     <h2 className="text-4xl font-display font-bold mb-2 text-white">Welcome Back</h2>
                     <div className="h-1 w-16 bg-secondary-500 mx-auto rounded-full"></div>
                     <p className="text-gray-400 mt-4 text-sm font-light">Enter your credentials to access your account</p>
+                </div>
+
+                <div className="mb-8 flex justify-center">
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={() => setError("Google Login Failed")}
+                        theme="filled_black"
+                        shape="pill"
+                        text="signin_with"
+                        size="large"
+                    />
+                </div>
+
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="h-px bg-white/10 flex-1"></div>
+                    <span className="text-xs text-gray-500 uppercase tracking-widest">OR</span>
+                    <div className="h-px bg-white/10 flex-1"></div>
                 </div>
 
                 {error && <p className="bg-red-500/10 border border-red-500/50 text-red-200 p-3 rounded text-center mb-6 text-sm">{error}</p>}
