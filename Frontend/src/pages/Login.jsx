@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -25,8 +27,8 @@ const Login = () => {
             const res = await api.post('/api/users/login', formData);
             console.log('Login successful:', res.data);
 
-            // Save token
-            localStorage.setItem('token', res.data.token);
+            // Update Auth Context and LocalStorage
+            login(res.data.data.user, res.data.token);
 
             navigate('/profile');
         } catch (err) {
@@ -41,7 +43,10 @@ const Login = () => {
             setLoading(true);
             const { credential } = credentialResponse;
             const res = await api.post('/api/users/google', { token: credential });
-            localStorage.setItem('token', res.data.token);
+
+            // Update Auth Context and LocalStorage
+            login(res.data.data.user, res.data.token);
+
             navigate('/profile');
         } catch (err) {
             console.error("Google login failed", err);

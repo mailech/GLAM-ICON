@@ -49,6 +49,18 @@ app.get('/', (req, res) => {
   res.send('Glam Icon Events API is running');
 });
 
+// DB Test Route
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const count = await User.countDocuments();
+    res.json({ status: 'success', message: 'DB Connected', userCount: count });
+  } catch (err) {
+    console.error("DB TEST FAILED:", err);
+    res.status(500).json({ status: 'error', message: 'DB Connection Failed: ' + err.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('ERROR 💥:', err);
