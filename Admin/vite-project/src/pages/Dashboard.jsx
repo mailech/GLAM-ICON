@@ -78,6 +78,11 @@ const Dashboard = () => {
         }
     };
 
+    const filteredTickets = tickets.filter(t => {
+        if (filter === 'all') return true;
+        return (t.applicationStatus || 'pending') === filter;
+    });
+
     const getMediaUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
