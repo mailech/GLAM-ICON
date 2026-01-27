@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -12,7 +12,7 @@ const Login = () => {
         setError('');
 
         try {
-            const res = await axios.post('/api/users/login', formData);
+            const res = await api.post('/api/users/login', formData);
             if (res.data.status === 'success') {
                 const user = res.data.data.user;
                 if (user.role !== 'admin') {

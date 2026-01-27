@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
     const [tickets, setTickets] = useState([]);
     const [stats, setStats] = useState({ total: 0, pending: 0, shortlisted: 0, rejected: 0 });
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all'); // all, pending, shortlisted, rejected
+    const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
-    const [selectedMedia, setSelectedMedia] = useState(null); // { type: 'image' | 'video', url: '' }
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     useEffect(() => {
         fetchTickets();
@@ -19,7 +19,7 @@ const Dashboard = () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
-            const res = await axios.get('/api/tickets/admin/stats', {
+            const res = await api.get('/api/tickets/admin/stats', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.status === 'success') {
@@ -34,31 +34,20 @@ const Dashboard = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            console.log("Fetching tickets with token:", token);
-
             if (!token) {
-                console.warn("No token found, redirecting...");
                 window.location.href = '/login';
                 return;
             }
 
-            const res = await axios.get(`/api/tickets/admin/all?sort=-createdAt&page=${page}&limit=20`, {
+            const res = await api.get(`/api/tickets/admin/all?sort=-createdAt&page=${page}&limit=20`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log("API Response:", res.data);
-
             if (res.data && res.data.data && res.data.data.data) {
-                console.log("Setting tickets:", res.data.data.data);
                 setTickets(res.data.data.data);
-            } else {
-                console.warn("Unexpected API structure:", res.data);
             }
         } catch (err) {
             console.error("Failed to fetch tickets", err);
-            if (err.response) {
-                console.error("Error Response:", err.response.status, err.response.data);
-            }
             if (err.response && err.response.status === 401) {
                 window.location.href = '/login';
             }
@@ -73,53 +62,32 @@ const Dashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(`/api/tickets/${ticketId}`, {
+            await api.patch(`/api/tickets/${ticketId}`, {
                 status,
                 feedback
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Optimistic update for the table
             setTickets(tickets.map(t =>
                 t._id === ticketId ? { ...t, applicationStatus: status, adminFeedback: feedback } : t
             ));
-
-            // Refresh stats to ensure accuracy
             fetchStats();
         } catch (err) {
-            console.error("Update failed", err);
-            if (err.response) {
-                console.error("Error Response Data:", err.response.data);
-                console.error("Error Status:", err.response.status);
-                alert(`Failed to update status: ${err.response.data.message || err.message}`);
-            } else {
-                alert(`Failed to update status: ${err.message}`);
-            }
+            alert(`Failed to update status: ${err.response?.data?.message || err.message}`);
         }
     };
-
-    const filteredTickets = tickets.filter(t => {
-        if (filter === 'all') return true;
-        return (t.applicationStatus || 'pending') === filter;
-    });
 
     const getMediaUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
-
-        // Handle Backslashes (Windows paths stored in DB)
         const normalizedUrl = url.replace(/\\/g, '/');
-
-        // Clean up any double slashes just in case
         const cleanUrl = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-        // If it looks like a Cloudinary path or we want to be safe
-        if (cleanUrl.includes('cloudinary')) return url; // Should have been caught by startsWith http
-
-        // Local Fallback
-        if (cleanUrl.startsWith('/uploads/')) return `http://localhost:4005${cleanUrl}`;
-        return `http://localhost:4005/uploads${cleanUrl}`;
+        if (cleanUrl.includes('cloudinary')) return url; // Should have been http already
+        if (cleanUrl.startsWith('/uploads/')) return `${baseUrl}${cleanUrl}`;
+        return `${baseUrl}/uploads${cleanUrl}`;
     };
 
     // Logout function
