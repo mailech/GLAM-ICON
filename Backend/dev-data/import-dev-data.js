@@ -96,18 +96,40 @@ const importData = async () => {
     try {
         // NOTE: We need a valid organizer ID. We will find the first admin user or just the first user.
         const User = require('../models/User');
-        const admin = await User.findOne(); // Just get any user to be the organizer
+        let admin = await User.findOne(); // Just get any user to be the organizer
 
-        if (admin) {
-            events.forEach(ev => {
-                ev.organizer = admin._id;
-                // map category to enum
-                if (ev.category === 'competition') ev.category = 'other';
-            });
-        } else {
-            console.log('No user found to assign as organizer. Create a user first!');
-            process.exit();
+        if (!admin) {
+            console.log('No user found. Creating a default admin user...');
+            try {
+                const year = new Date().getFullYear();
+                const random = Math.floor(10000 + Math.random() * 90000);
+                admin = await User.create({
+                    name: 'Glam Admin',
+                    email: 'admin@glamicon.io',
+                    password: 'password1234',
+                    isVerified: true,
+                    role: 'admin',
+                    memberId: `GII-${year}-${random}`
+                });
+                console.log('Default admin created:', admin.email);
+            } catch (createErr) {
+                console.error('FAILED to create default user:', createErr.message);
+                if (createErr.errors) {
+                    Object.keys(createErr.errors).forEach(key => {
+                        console.error(`- ${key}: ${createErr.errors[key].message}`);
+                    });
+                }
+            }
         }
+
+        // Always fix categories and assign organizer
+        events.forEach(ev => {
+            if (admin) {
+                ev.organizer = admin._id;
+            }
+            // map category to enum
+            if (ev.category === 'competition') ev.category = 'other';
+        });
 
         await Event.create(events);
         console.log('Data successfully loaded!');
