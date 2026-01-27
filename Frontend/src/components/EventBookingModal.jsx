@@ -34,7 +34,7 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
 
     const uploadToCloudinary = async (file) => {
         const cloudName = 'dttb9lvfl'; // Your Cloudinary Cloud Name
-        const uploadPreset = 'glam_uploads'; // MUST EXIST in Cloudinary Settings as Unsigned
+        const uploadPreset = 'glam_test'; // NEW Preset
 
         const formData = new FormData();
         formData.append('file', file);
