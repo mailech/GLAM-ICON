@@ -34,9 +34,50 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/glamicon-events')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false, // Disable buffering to fail fast if no connection
+    };
+
+    cached.promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/glamicon-events', opts).then((mongoose) => {
+      console.log('Connected to MongoDB');
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+// Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+  // Skip for static files or simple health checks if needed, but safer to just connect
+  if (req.path === '/') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("DB Middleware Connection Error:", error);
+    res.status(500).json({ status: 'error', message: 'Database connection failed' });
+  }
+});
 
 // Routes
 app.use('/api/users', userRoutes);
