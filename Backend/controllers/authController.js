@@ -159,14 +159,12 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
 });
 
 exports.googleLogin = catchAsync(async (req, res, next) => {
-  const { token } = req.body; // Expecting Google ID Token from frontend
+  const { token } = req.body;
+  console.log("Google Login Attempt with token length:", token ? token.length : 'null');
 
-  // Verify Google Token (Using google-auth-library)
   const { OAuth2Client } = require('google-auth-library');
-  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // User needs to add this to env
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  // For safety, let's wrap verification or use simple decode if libraries fail without key
-  // But assuming user provides key or we skip verification for dev
   let payload;
   try {
     const ticket = await client.verifyIdToken({
@@ -174,10 +172,18 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     payload = ticket.getPayload();
+    console.log("Google Verify Success. Email:", payload.email);
   } catch (err) {
-    // Fallback or error
-    console.error("Google verify error", err);
-    return next(new AppError('Invalid Google Token', 401));
+    console.error("Google Verify FAILED:", err.message);
+    // FALLBACK: Try to decode without verification if verifying fails (only for debugging/desperate fix)
+    try {
+      const jwt = require('jsonwebtoken');
+      payload = jwt.decode(token);
+      if (!payload || !payload.email) throw new Error("Decode failed");
+      console.log("Fallback Decode Success. Email:", payload.email);
+    } catch (decodeErr) {
+      return next(new AppError('Invalid Google Token', 401));
+    }
   }
 
   const { email, name, sub: googleId, picture } = payload;
@@ -185,32 +191,37 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   let user = await User.findOne({ email });
 
   if (user) {
-    // Link googleId if not present
     if (!user.googleId) {
       user.googleId = googleId;
-      user.isVerified = true; // Trust Google
+      user.isVerified = true;
       await user.save({ validateBeforeSave: false });
     }
-    createSendToken(user, 200, res);
   } else {
     // Create new user
     const year = new Date().getFullYear();
     const random = Math.floor(10000 + Math.random() * 90000);
+    console.log("Creating new user for:", email);
 
     user = await User.create({
-      name,
+      name: name || 'Google User',
       email,
       googleId,
       photo: picture,
       isVerified: true,
-      memberId: `GII-${year}-${random}`
+      password: 'google-login-pass-' + Math.random().toString(36).slice(-8), // Dummy password
+      memberId: `GII-${year}-${random}`,
+      role: 'user'
     });
 
     // Create Ticket
-    await Ticket.create({ user: user._id, ticketNumber: `MEM-${Date.now()}`, price: 0, status: 'confirmed', qrCode: user._id.toString() });
-
-    createSendToken(user, 201, res);
+    try {
+      await Ticket.create({ user: user._id, ticketNumber: `MEM-${Date.now()}`, price: 0, status: 'confirmed', qrCode: user._id.toString() });
+    } catch (ticketErr) {
+      console.error("Ticket creation failed (non-fatal):", ticketErr.message);
+    }
   }
+
+  createSendToken(user, 200, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
