@@ -32,26 +32,55 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
         setFiles({ ...files, [e.target.name]: e.target.files[0] });
     };
 
-    const uploadFiles = async () => {
-        const data = new FormData();
-        if (files.profilePhoto) data.append('profilePhoto', files.profilePhoto);
-        if (files.birthCertificate) data.append('birthCertificate', files.birthCertificate);
-        if (files.video) data.append('video', files.video);
+    const uploadToCloudinary = async (file) => {
+        const cloudName = 'dttb9lvfl'; // Your Cloudinary Cloud Name
+        const uploadPreset = 'glam_uploads'; // MUST EXIST in Cloudinary Settings as Unsigned
 
-        if (!files.profilePhoto && !files.birthCertificate && !files.video) return {};
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', uploadPreset);
+
+        try {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error?.message || 'Upload failed');
+            }
+
+            const data = await res.json();
+            return data.secure_url;
+        } catch (err) {
+            console.error("Cloudinary Upload Error:", err);
+            throw err;
+        }
+    };
+
+    const uploadFiles = async () => {
+        const urls = {};
 
         try {
             setUploading(true);
-            const res = await api.post('/api/upload', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+
+            if (files.profilePhoto) {
+                urls.profilePhoto = await uploadToCloudinary(files.profilePhoto);
+            }
+            if (files.birthCertificate) {
+                urls.birthCertificate = await uploadToCloudinary(files.birthCertificate);
+            }
+            if (files.video) {
+                urls.video = await uploadToCloudinary(files.video);
+            }
+
             setUploading(false);
-            return res.data.data;
+            return urls;
         } catch (err) {
             console.error('Upload failed', err);
             setUploading(false);
-            const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-            alert(`File upload failed: ${errorMsg}`);
+            alert(`File upload failed: ${err.message}. Please check console.`);
             return null;
         }
     };
