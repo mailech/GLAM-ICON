@@ -45,9 +45,10 @@ const Profile = () => {
 
         } catch (err) {
             console.error("Profile fetch error:", err);
-            if (err.response && err.response.status === 401) {
-                navigate('/login');
-            }
+            setError(err.response?.data?.message || 'Failed to load profile. Please check console.');
+            // if (err.response && err.response.status === 401) {
+            //     navigate('/login');
+            // }
         } finally {
             setLoading(false);
         }
