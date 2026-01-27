@@ -61,36 +61,36 @@ const Home = () => {
                 </motion.div>
 
                 {/* Hero Content */}
-                <div className="relative z-10 text-center px-6 max-w-5xl mx-auto mt-20">
+                <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto mt-20">
                     <motion.div
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
                     >
-                        <motion.div variants={fadeInUp} className="mb-6 flex items-center justify-center gap-4">
-                            <span className="h-[1px] w-12 bg-secondary-500"></span>
-                            <span className="text-secondary-400 uppercase tracking-[0.4em] text-xs md:text-sm font-bold glow-text">The Official Platform</span>
-                            <span className="h-[1px] w-12 bg-secondary-500"></span>
+                        <motion.div variants={fadeInUp} className="mb-4 sm:mb-6 flex items-center justify-center gap-2 sm:gap-4">
+                            <span className="h-[1px] w-8 sm:w-12 bg-secondary-500"></span>
+                            <span className="text-secondary-400 uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[10px] sm:text-sm font-bold glow-text">The Official Platform</span>
+                            <span className="h-[1px] w-8 sm:w-12 bg-secondary-500"></span>
                         </motion.div>
 
-                        <motion.h1 variants={fadeInUp} className="text-7xl md:text-9xl font-display font-bold leading-none tracking-tight mb-8 drop-shadow-2xl">
+                        <motion.h1 variants={fadeInUp} className="text-5xl sm:text-7xl md:text-9xl font-display font-bold leading-none tracking-tight mb-6 sm:mb-8 drop-shadow-2xl">
                             GLAM ICONIC <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-br from-secondary-300 via-secondary-500 to-secondary-700 drop-shadow-sm filter">INDIA</span>
                         </motion.h1>
 
-                        <motion.p variants={fadeInUp} className="text-lg md:text-xl text-gray-200 font-light max-w-2xl mx-auto mb-12 leading-relaxed drop-shadow-md">
+                        <motion.p variants={fadeInUp} className="text-sm sm:text-lg md:text-xl text-gray-200 font-light max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed drop-shadow-md px-2">
                             The definitive stage for India's next generation of supermodels and visionary designers.
                             <span className="block mt-2 text-white font-medium">Your journey to stardom begins here.</span>
                         </motion.p>
 
-                        <motion.div variants={fadeInUp} className="flex flex-col md:flex-row gap-6 justify-center items-center">
-                            <Link to="/register" className="group relative px-8 py-4 bg-secondary-600 text-white font-bold text-sm uppercase tracking-widest overflow-hidden rounded-sm transition-all hover:bg-secondary-500 hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.5)] border border-transparent">
-                                <span className="relative z-10 flex items-center gap-2">
+                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center w-full sm:w-auto">
+                            <Link to="/register" className="group relative w-full sm:w-auto px-8 py-4 bg-secondary-600 text-white font-bold text-xs sm:text-sm uppercase tracking-widest overflow-hidden rounded-sm transition-all hover:bg-secondary-500 hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.5)] border border-transparent">
+                                <span className="relative z-10 flex items-center justify-center gap-2">
                                     Register for 2026
                                     <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 </span>
                             </Link>
-                            <Link to="/events" className="group px-8 py-4 border border-white/30 text-white font-bold text-sm uppercase tracking-widest hover:bg-white hover:text-dark-950 transition-all rounded-sm backdrop-blur-md bg-white/5">
+                            <Link to="/events" className="group w-full sm:w-auto px-8 py-4 border border-white/30 text-white font-bold text-xs sm:text-sm uppercase tracking-widest hover:bg-white hover:text-dark-950 transition-all rounded-sm backdrop-blur-md bg-white/5">
                                 Explore Events
                             </Link>
                         </motion.div>
@@ -102,37 +102,38 @@ const Home = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.5, duration: 1 }}
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20"
+                    className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20"
                 >
                     <span className="text-[10px] uppercase tracking-widest text-gray-400">Scroll to Explore</span>
-                    <div className="w-[1px] h-12 bg-gradient-to-b from-secondary-500 to-transparent"></div>
+                    <div className="w-[1px] h-8 sm:h-12 bg-gradient-to-b from-secondary-500 to-transparent"></div>
                 </motion.div>
             </section>
 
             {/* --- MARQUEE SECTION --- */}
-            <div className="bg-secondary-950 border-y border-white/5 py-8 overflow-hidden relative z-20">
+            <div className="bg-surface py-6 sm:py-8 overflow-hidden relative z-20 transition-colors duration-300">
                 <motion.div
-                    animate={{ x: [0, -1000] }}
-                    transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                    className="flex whitespace-nowrap gap-20 text-4xl md:text-6xl font-display font-bold text-white/20 select-none items-center"
+                    animate={{ x: "-50%" }}
+                    transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                    className="flex whitespace-nowrap gap-10 sm:gap-20 text-3xl sm:text-4xl md:text-6xl font-display font-bold text-text-primary/10 select-none items-center w-max"
                 >
-                    <span className="text-stroke-sm hover:text-white transition-colors duration-300">FASHION WEEK 2026</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
-                    <span className="text-stroke-sm hover:text-white transition-colors duration-300">MODEL HUNT</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
-                    <span className="text-stroke-sm hover:text-white transition-colors duration-300">DESIGNER SHOWCASE</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
-                    <span className="text-secondary-500 glow-text">GLAM ICONIC INDIA</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
-                    <span className="text-stroke-sm hover:text-white transition-colors duration-300">FASHION WEEK 2026</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
-                    <span className="text-stroke-sm hover:text-white transition-colors duration-300">MODEL HUNT</span>
-                    <span className="text-secondary-500 text-2xl">✦</span>
+                    {/* Content duplicated for seamless looping */}
+                    {[1, 2].map((_, i) => (
+                        <React.Fragment key={i}>
+                            <span className="text-stroke-sm hover:text-text-primary transition-colors duration-300">FASHION WEEK 2026</span>
+                            <span className="text-secondary-500 text-lg sm:text-2xl">✦</span>
+                            <span className="text-stroke-sm hover:text-text-primary transition-colors duration-300">MODEL HUNT</span>
+                            <span className="text-secondary-500 text-lg sm:text-2xl">✦</span>
+                            <span className="text-stroke-sm hover:text-text-primary transition-colors duration-300">DESIGNER SHOWCASE</span>
+                            <span className="text-secondary-500 text-lg sm:text-2xl">✦</span>
+                            <span className="text-secondary-500 glow-text">GLAM ICONIC INDIA</span>
+                            <span className="text-secondary-500 text-lg sm:text-2xl">✦</span>
+                        </React.Fragment>
+                    ))}
                 </motion.div>
             </div>
 
             {/* --- FEATURES GRID --- */}
-            <section className="py-24 px-6 bg-dark-900 relative">
+            <section className="py-16 sm:py-24 px-4 sm:px-6 bg-background relative transition-colors duration-300">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[
@@ -161,7 +162,7 @@ const Home = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.2 }}
-                                className="group relative h-[450px] overflow-hidden rounded-2xl cursor-pointer border border-white/5 hover:border-secondary-500/50 transition-all duration-500 shadow-2xl"
+                                className="group relative h-[380px] sm:h-[450px] overflow-hidden rounded-2xl cursor-pointer border border-border hover:border-secondary-500/50 transition-all duration-500 shadow-2xl"
                             >
                                 <div className="absolute inset-0 bg-dark-800">
                                     <img
@@ -170,13 +171,13 @@ const Home = () => {
                                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                     />
                                     {/* Gradient Overlay for Text Visibility */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/60 to-transparent opacity-80" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80" />
                                 </div>
 
-                                <div className="absolute bottom-0 left-0 p-10 w-full transform transition-all duration-500">
-                                    <div className="text-4xl mb-4 transform group-hover:-translate-y-2 transition-transform duration-500">{item.icon}</div>
-                                    <h3 className="text-4xl font-display font-bold text-white mb-4 group-hover:text-secondary-400 transition-colors">{item.title}</h3>
-                                    <p className="text-gray-300 text-lg font-light leading-relaxed max-w-sm mb-6 opacity-90">
+                                <div className="absolute bottom-0 left-0 p-6 sm:p-10 w-full transform transition-all duration-500">
+                                    <div className="text-3xl sm:text-4xl mb-2 sm:mb-4 transform group-hover:-translate-y-2 transition-transform duration-500">{item.icon}</div>
+                                    <h3 className="text-3xl sm:text-4xl font-display font-bold text-white mb-2 sm:mb-4 group-hover:text-secondary-400 transition-colors">{item.title}</h3>
+                                    <p className="text-gray-300 text-sm sm:text-lg font-light leading-relaxed max-w-sm mb-4 sm:mb-6 opacity-90">
                                         {item.desc}
                                     </p>
                                     <div className="flex items-center gap-2 text-secondary-500 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
@@ -191,9 +192,9 @@ const Home = () => {
             </section>
 
             {/* --- STATS SECTION --- */}
-            <section className="py-20 border-y border-white/5 bg-dark-950">
+            <section className="py-16 sm:py-20 bg-surface transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 text-center">
                         {[
                             { label: "Designers", value: "50+" },
                             { label: "Models", value: "200+" },
@@ -207,8 +208,8 @@ const Home = () => {
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
                             >
-                                <h4 className="text-5xl md:text-6xl font-display font-bold text-white mb-2">{stat.value}</h4>
-                                <p className="text-xs uppercase tracking-widest text-secondary-500 font-bold">{stat.label}</p>
+                                <h4 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-text-primary mb-2 transition-colors duration-300 text-shadow-sm">{stat.value}</h4>
+                                <p className="text-[10px] sm:text-xs uppercase tracking-widest text-secondary-500 font-bold">{stat.label}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -216,16 +217,16 @@ const Home = () => {
             </section>
 
             {/* --- CALL TO ACTION --- */}
-            <section className="py-24 px-6 bg-dark-950 flex items-center justify-center">
+            <section className="py-16 sm:py-24 px-4 sm:px-6 bg-dark-950 flex items-center justify-center">
                 <div className="max-w-6xl w-full mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="bg-dark-900 rounded-3xl overflow-hidden shadow-2xl border border-white/5 grid grid-cols-1 md:grid-cols-5 relative group"
+                        className="bg-dark-900 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/5 grid grid-cols-1 md:grid-cols-5 relative group"
                     >
                         {/* LEFT: Image Section (2 cols) */}
-                        <div className="md:col-span-2 relative min-h-[450px] overflow-hidden">
+                        <div className="md:col-span-2 relative min-h-[300px] sm:min-h-[450px] overflow-hidden">
                             <AnimatePresence mode="wait">
                                 <motion.img
                                     key={currentImageIndex}
@@ -246,7 +247,7 @@ const Home = () => {
                             <div className="absolute inset-4 border border-white/30 z-20 pointer-events-none transition-all duration-700 group-hover:inset-6 group-hover:border-secondary-400"></div>
 
                             {/* EST Tag */}
-                            <div className="absolute left-8 bottom-8 z-30">
+                            <div className="absolute left-6 bottom-6 sm:left-8 sm:bottom-8 z-30">
                                 <span className="bg-black/50 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white border border-white/20">
                                     EST. 2026
                                 </span>
@@ -254,10 +255,10 @@ const Home = () => {
                         </div>
 
                         {/* RIGHT: Content Section (3 cols) */}
-                        <div className="md:col-span-3 p-10 md:p-16 flex flex-col justify-center text-left relative overflow-hidden bg-gradient-to-br from-dark-900 to-black">
+                        <div className="md:col-span-3 p-8 sm:p-10 md:p-16 flex flex-col justify-center text-left relative overflow-hidden bg-gradient-to-br from-dark-900 to-black">
 
                             {/* Giant Background Symbol (Watermark) */}
-                            <div className="absolute -bottom-10 -right-10 text-[250px] font-display font-bold text-white/5 leading-none select-none pointer-events-none rotate-12 transition-transform duration-700 group-hover:rotate-0 group-hover:scale-105">
+                            <div className="absolute -bottom-10 -right-10 text-[150px] sm:text-[250px] font-display font-bold text-white/5 leading-none select-none pointer-events-none rotate-12 transition-transform duration-700 group-hover:rotate-0 group-hover:scale-105">
                                 Gi
                             </div>
 
@@ -265,25 +266,25 @@ const Home = () => {
                             <div className="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
                             <div className="relative z-10">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <span className="w-12 h-[1px] bg-secondary-500"></span>
-                                    <p className="text-secondary-500 font-serif italic text-lg">An Exclusive Invitation</p>
+                                <div className="flex items-center gap-4 mb-4 sm:mb-6">
+                                    <span className="w-8 sm:w-12 h-[1px] bg-secondary-500"></span>
+                                    <p className="text-secondary-500 font-serif italic text-base sm:text-lg">An Exclusive Invitation</p>
                                 </div>
 
-                                <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6 leading-tight">
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
                                     Join the Elite Circle of <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">Indian Fashion.</span>
                                 </h2>
 
-                                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-10 max-w-lg font-light border-l-2 border-white/10 pl-6">
+                                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 sm:mb-10 max-w-lg font-light border-l-2 border-white/10 pl-4 sm:pl-6">
                                     The runway is calling. Whether you aspire to be the face of the next big brand or design the collection that defines a generation, it starts here.
                                 </p>
 
-                                <div className="flex flex-col sm:flex-row items-center gap-6">
-                                    <Link to="/register" className="px-10 py-4 bg-white text-black text-xs font-bold uppercase tracking-widest rounded transition-all hover:bg-secondary-500 hover:text-white hover:scale-105 shadow-xl relative z-20">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6">
+                                    <Link to="/register" className="px-10 py-4 bg-white text-black text-xs font-bold uppercase tracking-widest rounded transition-all hover:bg-secondary-500 hover:text-white hover:scale-105 shadow-xl relative z-20 text-center">
                                         Begin Application
                                     </Link>
-                                    <Link to="/events" className="text-gray-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2 group/link relative z-20">
+                                    <Link to="/events" className="text-gray-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center sm:justify-start gap-2 group/link relative z-20">
                                         View Calendar
                                         <span className="group-hover/link:translate-x-1 transition-transform">→</span>
                                     </Link>

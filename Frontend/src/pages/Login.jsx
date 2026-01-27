@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
@@ -21,7 +21,7 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('/api/users/login', formData);
+            const res = await api.post('/api/users/login', formData);
             console.log('Login successful:', res.data);
 
             // Save token

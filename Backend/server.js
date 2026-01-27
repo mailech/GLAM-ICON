@@ -11,11 +11,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 
 // Middleware
+app.use(cookieParser());
+// Middleware
 app.use(cors({
-  origin: '*',
-  credentials: true
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(morgan('dev'));
 app.use(express.json());
@@ -48,6 +53,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// For Vercel, we export the app
+module.exports = app;
+
+// Only listen if executed directly (not when imported by Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import EventBookingModal from '../components/EventBookingModal';
 
@@ -16,7 +16,7 @@ const Events = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const res = await axios.get('/api/events');
+                const res = await api.get('/api/events');
                 if (res.data && res.data.data && Array.isArray(res.data.data.events)) {
                     setEvents(res.data.data.events);
                 } else {
@@ -26,7 +26,7 @@ const Events = () => {
                 // Also fetch user to pre-fill modal if logged in
                 const token = localStorage.getItem('token');
                 if (token) {
-                    const userRes = await axios.get('/api/users/me', {
+                    const userRes = await api.get('/api/users/me', {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setUser(userRes.data.data.user);
@@ -58,7 +58,7 @@ const Events = () => {
         const token = localStorage.getItem('token');
 
         try {
-            await axios.post(`/api/events/${selectedEvent._id}/book`, {
+            await api.post(`/api/events/${selectedEvent._id}/book`, {
                 registrationData
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -77,6 +77,19 @@ const Events = () => {
                 alert(msg);
             }
         }
+    };
+
+    const getEventImage = (event) => {
+        // Specific fallbacks for known events if their image is missing or broken
+        if (event.title.includes('Mumbai Fashion Week')) return 'https://images.unsplash.com/photo-1576403233400-985429acb76d?q=80&w=1350&auto=format&fit=crop';
+        if (event.title.includes('Elite Model Hunt')) return 'https://images.unsplash.com/photo-1509631180846-36e3471803f1?q=80&w=675&auto=format&fit=crop';
+        if (event.title.includes('Abstract Art')) return 'https://images.unsplash.com/photo-1472653816316-3ad6f10a6592?q=80&w=1350&auto=format&fit=crop';
+        if (event.title.includes('Sustainable')) return 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1225&auto=format&fit=crop';
+
+        // General handling
+        if (!event.imageCover) return "https://images.unsplash.com/photo-1492684223066-81342ee5ff30";
+        if (event.imageCover.startsWith('http')) return event.imageCover;
+        return `/img/events/${event.imageCover}`;
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center text-secondary-400 font-display text-xl animate-pulse">Loading Exclusive Events...</div>;
@@ -102,7 +115,7 @@ const Events = () => {
 
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-6xl font-display font-bold mb-4 text-white">Upcoming <span className="text-gold italic">Collections</span></h1>
+                    <h1 className="text-3xl md:text-6xl font-display font-bold mb-4 text-white">Upcoming <span className="text-gold italic">Collections</span></h1>
                     <p className="text-gray-400 max-w-2xl mx-auto font-light">Select an exclusive event to attend. Use your membership pass for instant access.</p>
                 </div>
 
@@ -116,7 +129,7 @@ const Events = () => {
                             className="group bg-dark-800 rounded-xl overflow-hidden border border-white/5 hover:border-secondary-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 flex flex-col h-full"
                         >
                             <div className="h-64 overflow-hidden relative shrink-0">
-                                <img src={event.imageCover} alt={event.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                                <img src={getEventImage(event)} alt={event.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-90"></div>
 
                                 <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded text-xs font-bold uppercase tracking-widest text-white border border-white/20">

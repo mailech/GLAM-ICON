@@ -55,6 +55,12 @@ const ticketSchema = new mongoose.Schema({
     video: String,
     age: Number,
     height: String,
+    weight: String,
+    bust: String,
+    waist: String,
+    hips: String,
+    shoeSize: String,
+    description: String,
     measurements: String,
     name: String,
     email: String,
@@ -62,7 +68,7 @@ const ticketSchema = new mongoose.Schema({
   },
   applicationStatus: {
     type: String,
-    enum: ['pending', 'shortlisted', 'rejected'],
+    enum: ['pending', 'shortlisted', 'rejected', 'completed'],
     default: 'pending'
   },
   adminFeedback: String

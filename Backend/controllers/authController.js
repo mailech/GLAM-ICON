@@ -130,6 +130,14 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
   user.isVerified = true;
   user.otp = undefined;
   user.otpExpires = undefined;
+
+  // Generate Member ID if not present
+  if (!user.memberId) {
+    const year = new Date().getFullYear();
+    const random = Math.floor(10000 + Math.random() * 90000); // 5 digit random
+    user.memberId = `GII-${year}-${random}`;
+  }
+
   await user.save({ validateBeforeSave: false });
 
   // Create Ticket if new user logic needed here? Usually done at signup but we can do it here or leave it. 
@@ -186,12 +194,16 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res);
   } else {
     // Create new user
+    const year = new Date().getFullYear();
+    const random = Math.floor(10000 + Math.random() * 90000);
+
     user = await User.create({
       name,
       email,
       googleId,
       photo: picture,
-      isVerified: true
+      isVerified: true,
+      memberId: `GII-${year}-${random}`
     });
 
     // Create Ticket

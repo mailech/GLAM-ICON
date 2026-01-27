@@ -46,15 +46,23 @@ const Phase2Form = () => {
 
             // Simulating API call since backend endpoint for Phase 2 data isn't explicitly built yet
             // extending the Ticket model would be Step 2 of Backend
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // await new Promise(resolve => setTimeout(resolve, 1500));
 
             // Assuming we send data to update the ticket
-            // await axios.patch(`/api/tickets/${ticketId}`, { ...formData, applicationStatus: 'phase2_submitted' });
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:4005/api/tickets/${ticketId}/phase2`, { ...formData }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
             setSubmitted(true);
         } catch (err) {
-            console.error(err);
-            alert("Failed to submit. Please try again.");
+            console.error("Submission Error Details:", err);
+            if (err.response) {
+                console.error("Server Response:", err.response.data);
+                alert(`Failed to submit: ${err.response.data.message || err.message}`);
+            } else {
+                alert("Failed to submit. Please try again.");
+            }
         } finally {
             setLoading(false);
         }

@@ -3,8 +3,42 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Light Mode Default */
+    --color-background: 248 250 252;
+    /* Slate 50 */
+    --color-surface: 255 255 255;
+    /* White */
+    --color-surface-highlight: 241 245 249;
+    /* Slate 100 */
+    --color-text-primary: 15 23 42;
+    /* Slate 900 */
+    --color-text-secondary: 71 85 105;
+    /* Slate 600 */
+    --color-border: 226 232 240;
+    /* Slate 200 */
+  }
+
+  .dark {
+    /* Dark Mode Override */
+    --color-background: 12 12 14;
+    /* Custom Dark 900 */
+    --color-surface: 28 28 30;
+    /* Custom Dark 800 */
+    --color-surface-highlight: 44 44 46;
+    /* Custom Dark 700 */
+    --color-text-primary: 241 245 249;
+    /* Slate 100 */
+    --color-text-secondary: 148 163 184;
+    /* Slate 400 */
+    --color-border: 255 255 255;
+    /* White with opacity to be handled in utility */
+  }
+
   body {
-    @apply bg-dark-900 text-gray-100 font-sans antialiased;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-text-primary));
+    @apply font-sans antialiased transition-colors duration-300;
   }
 
   h1,
@@ -42,4 +76,17 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-secondary-500/50 rounded-full hover:bg-secondary-500;
 }

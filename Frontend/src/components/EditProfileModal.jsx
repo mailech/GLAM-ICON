@@ -9,13 +9,13 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
         phone: user?.phone || '',
         gender: user?.gender || '',
         instagram: user?.socialLinks?.instagram || '',
-        linkedin: user?.socialLinks?.linkedin || '',
+        twitter: user?.socialLinks?.twitter || '',
         portfolio: user?.socialLinks?.portfolio || '',
         photo: null // File object
     });
     const [preview, setPreview] = useState(
         user?.photo && user.photo !== 'default.jpg'
-            ? `/img/users/${user.photo}`
+            ? (user.photo.startsWith('http') ? user.photo : `/img/users/${user.photo}`)
             : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`
     );
     const [loading, setLoading] = useState(false);
@@ -45,26 +45,13 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
             data.append('phone', formData.phone);
             data.append('gender', formData.gender);
 
-            // Append nested social links individually as backend might expect specific handling or flattening
-            // However, our backend controller simply takes body fields.
-            // But since we are using FormData, we can't send a JSON object directly for 'socialLinks'.
-            // We need to adjust either backend or send individual keys.
-            // Let's assume we modify backend or send keys that backend maps?
-            // Wait, previous backend controller: `const filteredBody = filterObj(req.body, ...)`
-            // If we send `socialLinks[instagram]`, express body-parser with extended:true might parse it, but multer handles multipart.
-            // Let's stick to flat keys if possible or send flattened structure if backend supports it.
-            // Actually, the backend User model has a socialLinks object.
-            // Let's just append them as 'socialLinks.instagram' etc if the backend implementation supports it, 
-            // OR simply update the Controller to handle individual fields if needed.
-            // Let's check `userController.js` logic again. It uses `filterObj` on `req.body`.
-            // `req.body` with multer will contain text fields.
-            // If we send `socialLinks` as a JSON string, we might need to parse it on backend.
-            // EASIEST FIX: Send them as `socialLinks` object if possible, but FormData converts to string.
-            // Let's append them individually and let's update backend to handle this or just try `socialLinks[instagram]` convention.
-
-            data.append('socialLinks[instagram]', formData.instagram);
-            data.append('socialLinks[linkedin]', formData.linkedin);
-            data.append('socialLinks[portfolio]', formData.portfolio);
+            // Append nested social links as JSON string for reliable backend parsing
+            const socialLinks = {
+                instagram: formData.instagram,
+                twitter: formData.twitter,
+                portfolio: formData.portfolio
+            };
+            data.append('socialLinks', JSON.stringify(socialLinks));
 
             if (formData.photo) {
                 data.append('photo', formData.photo);
@@ -172,7 +159,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                                 className="bg-dark-800 border border-white/10 rounded-lg p-3 text-white text-sm"
                             />
                             <input
-                                type="text" name="linkedin" placeholder="LinkedIn URL" value={formData.linkedin} onChange={handleChange}
+                                type="text" name="twitter" placeholder="X (Twitter) Username" value={formData.twitter} onChange={handleChange}
                                 className="bg-dark-800 border border-white/10 rounded-lg p-3 text-white text-sm"
                             />
                             <input

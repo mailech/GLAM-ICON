@@ -17,8 +17,11 @@ router
     .get(ticketController.getTicket)
     .patch(authController.restrictTo('admin'), ticketController.updateTicketStatus);
 
+router.patch('/:id/phase2', ticketController.submitPhase2);
+
 // Admin routes
 // router.use(authController.restrictTo('admin'));
+router.route('/admin/export').get(ticketController.exportTicketsExcel);
 router.route('/admin/stats').get(ticketController.getTicketStats);
 router.route('/admin/all').get(ticketController.getAllTickets);
 

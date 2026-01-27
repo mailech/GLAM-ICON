@@ -51,12 +51,21 @@ const userSchema = new mongoose.Schema({
   },
   socialLinks: {
     instagram: String,
-    linkedin: String,
+    twitter: String,
     portfolio: String
   },
   preferences: {
     notifications: { type: Boolean, default: true },
     newsletter: { type: Boolean, default: true }
+  },
+  memberId: {
+    type: String,
+    unique: true
+  },
+  applicationStatus: {
+    type: String,
+    enum: ['none', 'pending', 'shortlisted', 'rejected', 'completed'],
+    default: 'none'
   },
   createdAt: {
     type: Date,

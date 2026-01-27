@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -25,7 +25,7 @@ const Register = () => {
       setLoading(true);
       const { credential } = credentialResponse;
       // Send google token to backend
-      const res = await axios.post('/api/users/google', { token: credential });
+      const res = await api.post('/api/users/google', { token: credential });
       localStorage.setItem('token', res.data.token);
       navigate('/profile');
     } catch (err) {
@@ -65,7 +65,7 @@ const Register = () => {
       }
 
       try {
-        const response = await axios.post('/api/users/signup', data, {
+        const response = await api.post('/api/users/signup', data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         console.log('OTP Sent:', response.data);
@@ -78,7 +78,7 @@ const Register = () => {
       // Verify OTP Logic
       setLoading(true);
       try {
-        const response = await axios.post('/api/users/verifyOTP', {
+        const response = await api.post('/api/users/verifyOTP', {
           email: formData.email,
           otp
         });

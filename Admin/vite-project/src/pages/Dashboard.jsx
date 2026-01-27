@@ -89,7 +89,13 @@ const Dashboard = () => {
             fetchStats();
         } catch (err) {
             console.error("Update failed", err);
-            alert("Failed to update status");
+            if (err.response) {
+                console.error("Error Response Data:", err.response.data);
+                console.error("Error Status:", err.response.status);
+                alert(`Failed to update status: ${err.response.data.message || err.message}`);
+            } else {
+                alert(`Failed to update status: ${err.message}`);
+            }
         }
     };
 
@@ -128,7 +134,7 @@ const Dashboard = () => {
     const StatsCard = ({ title, value, color, icon }) => (
         <div className="bg-dark-800 p-6 rounded-xl border border-white/5 shadow-xl flex items-center justify-between group hover:border-white/10 transition-all">
             <div>
-                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">{title}</p>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{title}</p>
                 <h3 className={`text-4xl font-display font-bold ${color}`}>{value}</h3>
             </div>
             <div className={`text-2xl opacity-20 group-hover:opacity-100 transition-opacity ${color}`}>
@@ -182,7 +188,7 @@ const Dashboard = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
                     <div>
                         <h1 className="text-2xl md:text-3xl font-display font-bold">Admin Portal</h1>
-                        <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-widest">Glam Iconic India</p>
+                        <p className="text-gray-400 text-xs uppercase tracking-widest">Glam Iconic India</p>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-start sm:items-center">
@@ -190,8 +196,31 @@ const Dashboard = () => {
                         <div className="flex gap-6 md:mr-8 md:border-r border-white/10 md:pr-8 w-full md:w-auto justify-between md:justify-end">
                             <div className="text-left md:text-right">
                                 <span className="block text-xl md:text-2xl font-bold text-white">{stats.total}</span>
-                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">Total</span>
+                                <span className="text-xs text-gray-500 uppercase tracking-widest">Total</span>
                             </div>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const response = await axios.get('/api/tickets/admin/export', {
+                                            headers: { Authorization: `Bearer ${token}` },
+                                            responseType: 'blob',
+                                        });
+                                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.setAttribute('download', 'participants.xlsx');
+                                        document.body.appendChild(link);
+                                        link.click();
+                                    } catch (err) {
+                                        console.error("Export failed", err);
+                                        alert("Failed to export Excel file.");
+                                    }
+                                }}
+                                className="sm:hidden px-4 py-2 bg-green-600/20 text-green-500 border border-green-600/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-green-600/40 transition"
+                            >
+                                Export
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="sm:hidden px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
@@ -201,16 +230,39 @@ const Dashboard = () => {
                         </div>
 
                         <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
-                            {['all', 'pending', 'shortlisted', 'rejected'].map(f => (
+                            {['all', 'pending', 'shortlisted', 'rejected', 'completed'].map(f => (
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
-                                    className={`whitespace-nowrap px-4 py-2 rounded uppercase text-[10px] md:text-xs font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'bg-dark-800 text-gray-400 hover:text-white'}`}
+                                    className={`whitespace-nowrap px-4 py-2 rounded uppercase text-xs font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'bg-dark-800 text-gray-400 hover:text-white'}`}
                                 >
                                     {f}
                                 </button>
                             ))}
                         </div>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const response = await axios.get('/api/tickets/admin/export', {
+                                        headers: { Authorization: `Bearer ${token}` },
+                                        responseType: 'blob',
+                                    });
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', 'participants.xlsx');
+                                    document.body.appendChild(link);
+                                    link.click();
+                                } catch (err) {
+                                    console.error("Export failed", err);
+                                    alert("Failed to export Excel file.");
+                                }
+                            }}
+                            className="hidden sm:block px-4 py-2 bg-green-600 text-white rounded text-xs font-bold uppercase tracking-widest hover:bg-green-500 transition ml-2"
+                        >
+                            Export Excel
+                        </button>
                         <button
                             onClick={handleLogout}
                             className="hidden sm:block px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
@@ -231,14 +283,14 @@ const Dashboard = () => {
                 {/* Mobile Card View (Visible only on small screens) */}
                 <div className="md:hidden flex flex-col gap-4">
                     {filteredTickets.map(ticket => (
-                        <div key={ticket._id} className="bg-dark-800 p-5 rounded-xl border border-white/5 relative">
+                        <div key={ticket._id} className="bg-dark-800 p-5 rounded-xl border border-white/5 relative shadow-lg">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <span className="text-[10px] font-mono text-secondary-400 block mb-1">{ticket.ticketNumber}</span>
-                                    <h3 className="font-bold text-lg">{ticket.user?.name || 'Unknown'}</h3>
-                                    <p className="text-xs text-gray-500">{ticket.event?.title}</p>
+                                    <span className="text-xs font-mono text-secondary-400 block mb-1">{ticket.ticketNumber}</span>
+                                    <h3 className="font-bold text-lg text-white">{ticket.user?.name || 'Unknown'}</h3>
+                                    <p className="text-xs text-gray-400">{ticket.event?.title}</p>
                                 </div>
-                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${ticket.applicationStatus === 'shortlisted' ? 'bg-green-500/20 text-green-400' :
+                                <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${ticket.applicationStatus === 'shortlisted' ? 'bg-green-500/20 text-green-400' :
                                     ticket.applicationStatus === 'rejected' ? 'bg-red-500/20 text-red-400' :
                                         'bg-yellow-500/20 text-yellow-400'
                                     }`}>
@@ -255,26 +307,32 @@ const Dashboard = () => {
 
                             <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                                 {ticket.registrationData?.profilePhoto && (
-                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.profilePhoto })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">📷 Photo</button>
+                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.profilePhoto })} className="px-4 py-2 bg-dark-700/50 text-white border border-white/10 rounded text-xs font-medium hover:bg-dark-600 flex-shrink-0 flex items-center gap-2">
+                                        <span>📷</span> Photo
+                                    </button>
                                 )}
                                 {ticket.registrationData?.video && (
-                                    <button onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.video })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">🎥 Video</button>
+                                    <button onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.video })} className="px-4 py-2 bg-dark-700/50 text-white border border-white/10 rounded text-xs font-medium hover:bg-dark-600 flex-shrink-0 flex items-center gap-2">
+                                        <span>🎥</span> Video
+                                    </button>
                                 )}
                                 {ticket.registrationData?.birthCertificate && (
-                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.birthCertificate })} className="px-3 py-1.5 bg-dark-700 rounded text-xs hover:bg-dark-600 flex-shrink-0">📄 Cert</button>
+                                    <button onClick={() => setSelectedMedia({ type: 'image', url: ticket.registrationData.birthCertificate })} className="px-4 py-2 bg-dark-700/50 text-white border border-white/10 rounded text-xs font-medium hover:bg-dark-600 flex-shrink-0 flex items-center gap-2">
+                                        <span>📄</span> Cert
+                                    </button>
                                 )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     onClick={() => updateStatus(ticket._id, 'shortlisted')}
-                                    className="py-2 bg-green-600 text-white rounded text-xs font-bold uppercase hover:bg-green-500"
+                                    className="py-3 bg-green-600 text-white rounded text-xs font-bold uppercase hover:bg-green-500 shadow-lg shadow-green-900/20"
                                 >
                                     Shortlist
                                 </button>
                                 <button
                                     onClick={() => updateStatus(ticket._id, 'rejected')}
-                                    className="py-2 bg-red-600/20 border border-red-600/50 text-red-500 rounded text-xs font-bold uppercase hover:bg-red-600/30"
+                                    className="py-3 bg-red-600/20 border border-red-600/50 text-red-500 rounded text-xs font-bold uppercase hover:bg-red-600/30"
                                 >
                                     Reject
                                 </button>

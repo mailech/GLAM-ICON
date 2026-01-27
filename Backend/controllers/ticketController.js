@@ -33,37 +33,47 @@ exports.updateTicketStatus = catchAsync(async (req, res, next) => {
     }
 
     // 2. If status is 'shortlisted', send notification email
-    if (req.body.status === 'shortlisted' && ticket.user && ticket.user.email) {
-        const resetURL = `http://localhost:5173/phase-2-registration?ticketId=${ticket._id}`; // TODO: Change to prod URL in production
+    if (req.body.status === 'shortlisted' && ticket.user) {
+        // Sync status to User model so frontend banner appears
+        const User = require('../models/User'); // Lazy load to avoid circular dependency if any
+        await User.findByIdAndUpdate(ticket.user._id, { applicationStatus: 'shortlisted' });
 
-        try {
-            const sendEmail = require('../utils/email');
-
+        if (ticket.user.email) {
+            const resetURL = `http://localhost:5173/phase-2-registration?ticketId=${ticket._id}`; // TODO: Change to prod URL in production
             const message = `
-                Congratulations ${ticket.user.name}! 
-                
-                You have been SHORTLISTED for the next round of Glam Iconic India 2026!
-                The judges were impressed with your profile.
+                    Congratulations ${ticket.user.name}! 
+                    
+                    You have been SHORTLISTED for the next round of Glam Iconic India 2026!
+                    The judges were impressed with your profile.
 
-                Please complete your Phase 2 Registration to proceed further:
-                ${resetURL}
+                    Please complete your Phase 2 Registration to proceed further:
+                    ${resetURL}
 
-                Admin Feedback: ${req.body.feedback || 'Great profile!'}
+                    Admin Feedback: ${req.body.feedback || 'Great profile!'}
 
-                Best of luck,
-                The Glam Iconic India Team
-            `;
+                    Best of luck,
+                    The Glam Iconic India Team
+                `;
+            try {
+                const sendEmail = require('../utils/email');
 
-            await sendEmail({
-                email: ticket.user.email,
-                subject: 'You are Shortlisted! - Glam Iconic India',
-                message
-            });
-            console.log(`Shortlist email sent to ${ticket.user.email}`);
-        } catch (err) {
-            console.error('Email send failed:', err);
-            // Don't fail the request, just log it.
+                await sendEmail({
+                    email: ticket.user.email,
+                    subject: 'You are Shortlisted! - Glam Iconic India',
+                    message
+                });
+                console.log(`Shortlist email sent to ${ticket.user.email}`);
+            } catch (err) {
+                console.error('Email send failed! (Check .env credentials)');
+                console.log('--- EMAIL CONTENT PREVIEW ---');
+                console.log(message);
+                console.log('-----------------------------');
+            }
         }
+    } else if (req.body.status) {
+        // Sync other statuses (rejected, completed, etc)
+        const User = require('../models/User');
+        await User.findByIdAndUpdate(ticket.user._id, { applicationStatus: req.body.status });
     }
 
     res.status(200).json({
@@ -132,7 +142,9 @@ exports.getTicketStats = catchAsync(async (req, res, next) => {
         total: 0,
         pending: 0,
         shortlisted: 0,
-        rejected: 0
+        rejected: 0,
+        completed: 0,
+        cancelled: 0
     };
 
     stats.forEach(s => {
@@ -147,8 +159,6 @@ exports.getTicketStats = catchAsync(async (req, res, next) => {
         statsObj.total += s.count;
     });
 
-    // Explicitly mapping if the naming in DB is different, but assuming 'pending', 'shortlisted', 'rejected'
-
     res.status(200).json({
         status: 'success',
         data: {
@@ -156,3 +166,104 @@ exports.getTicketStats = catchAsync(async (req, res, next) => {
         }
     });
 });
+
+exports.exportTicketsExcel = catchAsync(async (req, res, next) => {
+    const ExcelJS = require('exceljs');
+
+    // Fetch all tickets with status 'completed' (or allow filtering)
+    // For now, let's export ALL completed Phase 2 registrations
+    const tickets = await Ticket.find({ applicationStatus: 'completed' }).populate('user');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Participants');
+
+    worksheet.columns = [
+        { header: 'Ticket No', key: 'ticketNumber', width: 20 },
+        { header: 'Name', key: 'name', width: 30 },
+        { header: 'Email', key: 'email', width: 30 },
+        { header: 'Phone', key: 'phone', width: 15 },
+        { header: 'Height', key: 'height', width: 15 },
+        { header: 'Weight', key: 'weight', width: 15 },
+        { header: 'Bust', key: 'bust', width: 10 },
+        { header: 'Waist', key: 'waist', width: 10 },
+        { header: 'Hips', key: 'hips', width: 10 },
+        { header: 'Shoe Size', key: 'shoeSize', width: 10 },
+        { header: 'Description', key: 'description', width: 40 },
+        { header: 'Status', key: 'status', width: 15 },
+    ];
+
+    tickets.forEach(ticket => {
+        worksheet.addRow({
+            ticketNumber: ticket.ticketNumber,
+            name: ticket.user.name,
+            email: ticket.user.email,
+            phone: ticket.registrationData?.phone || ticket.user.phone,
+            height: ticket.registrationData?.height || '-',
+            weight: ticket.registrationData?.weight || '-',
+            bust: ticket.registrationData?.bust || '-',
+            waist: ticket.registrationData?.waist || '-',
+            hips: ticket.registrationData?.hips || '-',
+            shoeSize: ticket.registrationData?.shoeSize || '-',
+            description: ticket.registrationData?.description || '-',
+            status: ticket.applicationStatus
+        });
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=participants.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+});
+
+exports.submitPhase2 = catchAsync(async (req, res, next) => {
+    // 1. Find ticket
+    const ticket = await Ticket.findById(req.params.id);
+
+    if (!ticket) {
+        return next(new AppError('No ticket found with that ID', 404));
+    }
+
+    // 2. Check if user owns the ticket or is admin
+    const ticketUserId = (ticket.user._id || ticket.user).toString();
+    const currentUserId = req.user.id.toString();
+
+    console.log(`DEBUG: Phase 2 Auth Check`);
+    console.log(`- Ticket ID: ${ticket._id}`);
+    console.log(`- Ticket User ID: ${ticketUserId}`);
+    console.log(`- Current User ID: ${currentUserId}`);
+    console.log(`- Current User Role: ${req.user.role}`);
+
+    if (ticketUserId !== currentUserId && req.user.role !== 'admin') {
+        return next(new AppError('You are not authorized to update this ticket', 403));
+    }
+
+    // 3. Update registration Data
+    // We map the incoming fields (bust, waist, etc.) into the registrationData sub-object
+    const phase2Data = {
+        height: req.body.height,
+        weight: req.body.weight,
+        bust: req.body.bust,
+        waist: req.body.waist,
+        hips: req.body.hips,
+        shoeSize: req.body.shoeSize,
+        description: req.body.description,
+    };
+
+    // Update ticket
+    ticket.registrationData = { ...ticket.registrationData, ...phase2Data };
+    ticket.applicationStatus = 'completed';
+    await ticket.save();
+
+    // 4. Update user status
+    const User = require('../models/User');
+    await User.findByIdAndUpdate(req.user.id, { applicationStatus: 'completed' });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            ticket
+        }
+    });
+});
+

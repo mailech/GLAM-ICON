@@ -65,9 +65,20 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         );
     }
 
-    // 2) Filtered out unwanted field names that are not allowed to be updated
+    // 2) Parse socialLinks if it's a JSON string (from FormData)
+    if (req.body.socialLinks && typeof req.body.socialLinks === 'string') {
+        try {
+            req.body.socialLinks = JSON.parse(req.body.socialLinks);
+        } catch (e) {
+            console.error("Error parsing socialLinks:", e);
+        }
+    }
+
+    // 3) Filter out unwanted field names that are not allowed to be updated
     const filteredBody = filterObj(req.body, 'name', 'email', 'bio', 'phone', 'gender', 'socialLinks', 'dob');
-    if (req.file) filteredBody.photo = req.file.filename;
+
+    // Store FULL Cloudinary URL so frontend can just use it directly
+    if (req.file) filteredBody.photo = req.file.path;
 
     // Calculate Age if DOB is present
     if (filteredBody.dob) {
