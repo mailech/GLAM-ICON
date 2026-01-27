@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion } from 'framer-motion';
 
 const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
+    // ... (rest of state)
     const [formData, setFormData] = useState({
         name: user?.name || '',
         bio: user?.bio || '',
@@ -57,7 +58,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                 data.append('photo', formData.photo);
             }
 
-            const res = await axios.patch('/api/users/updateMe', data, {
+            const res = await api.patch('/api/users/updateMe', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'

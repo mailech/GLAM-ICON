@@ -175,7 +175,7 @@ const Dashboard = () => {
                                 onClick={async () => {
                                     try {
                                         const token = localStorage.getItem('token');
-                                        const response = await axios.get('/api/tickets/admin/export', {
+                                        const response = await api.get('/api/tickets/admin/export', {
                                             headers: { Authorization: `Bearer ${token}` },
                                             responseType: 'blob',
                                         });
@@ -217,7 +217,7 @@ const Dashboard = () => {
                             onClick={async () => {
                                 try {
                                     const token = localStorage.getItem('token');
-                                    const response = await axios.get('/api/tickets/admin/export', {
+                                    const response = await api.get('/api/tickets/admin/export', {
                                         headers: { Authorization: `Bearer ${token}` },
                                         responseType: 'blob',
                                     });

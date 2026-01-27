@@ -10,7 +10,9 @@ const TicketDetailsModal = ({ ticket, isOpen, onClose }) => {
         if (path.startsWith('http')) return path;
         const normalizedPath = path.replace(/\\/g, '/');
         const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
-        return `http://localhost:4005${cleanPath.startsWith('/uploads') ? cleanPath : `/uploads${cleanPath}`}`;
+        // Use VITE_API_URL or fallback (but empty fallback is better than localhost in prod)
+        const baseUrl = import.meta.env.VITE_API_URL || 'https://glam-icon-backend.vercel.app';
+        return `${baseUrl}${cleanPath.startsWith('/uploads') ? cleanPath : `/uploads${cleanPath}`}`;
     };
 
     return createPortal(
@@ -82,15 +84,16 @@ const TicketDetailsModal = ({ ticket, isOpen, onClose }) => {
                                     )}
 
                                     {ticket.registrationData?.video && (
-                                        <a
-                                            href={getMediaUrl(ticket.registrationData.video)}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="block p-4 bg-dark-950 border border-white/10 rounded-xl hover:border-secondary-500 transition group text-center hover:bg-dark-900 flex flex-col justify-center items-center aspect-square"
-                                        >
-                                            <span className="text-3xl mb-2 block group-hover:scale-110 transition">🎥</span>
-                                            <span className="text-[10px] text-secondary-400 font-bold uppercase">Watch Video</span>
-                                        </a>
+                                        <div className="col-span-2 mt-2">
+                                            <p className="text-[10px] text-gray-400 uppercase font-bold mb-2">Audition Video</p>
+                                            <video
+                                                controls
+                                                className="w-full rounded-lg border border-white/10 bg-black max-h-[200px]"
+                                                src={getMediaUrl(ticket.registrationData.video)}
+                                            >
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
                                     )}
                                     {ticket.registrationData?.birthCertificate && (
                                         <a
