@@ -93,6 +93,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     photo: req.file ? req.file.filename : 'default.jpg',
+    role: 'user', // Enforce user role
     isVerified: false, // Explicitly set to false initially
     memberId: `GII-${year}-${random}`
   });
