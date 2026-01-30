@@ -111,7 +111,9 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
             phone: formData.phone,
             email: formData.email,
             dob: formData.dob,
-            age: formData.age
+            doB: formData.dob,
+            age: formData.age,
+            socialLinks: user?.socialLinks || {} // Include social links from user profile
         };
 
         // 3. Confirm Booking (No Payment Step)

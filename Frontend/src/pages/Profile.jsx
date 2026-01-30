@@ -59,20 +59,13 @@ const Profile = () => {
     }, []);
 
     // Auto-open edit modal if profile is incomplete (missing DOB or phone) - Run only once on initial load
+    // Auto-open edit modal if profile is incomplete
     useEffect(() => {
-        if (!loading && user && (!user.dob || !user.phone)) {
-            // Only open if it hasn't been opened automatically yet, or rely on user action. 
-            // To prevent re-opening after save, we can check if it's the *first* time we noticed it's missing.
-            // But simpler: Just remove this aggressive auto-check or make it smarter.
-            // Let's rely on a flag or just do it once.
-            // Better UX: Show a notification/banner instead of forcing a modal.
-            // But for now, fixing the "not going off" issue:
-            // The issue is likely that even after update, if one field is missing, it re-opens. 
-            // Logic: Check if we just updated? 
-
-            // I will simply Comment out this aggressive auto-opening for now as it causes the "loop" issue if user doesn't fill everything.
-            // Users can click the edit button.
-            // setIsEditModalOpen(true); 
+        if (!loading && user) {
+            const isProfileIncomplete = !user.name || !user.dob || !user.phone || !user.gender;
+            if (isProfileIncomplete) {
+                setIsEditModalOpen(true);
+            }
         }
     }, [loading, user]);
 
@@ -88,6 +81,7 @@ const Profile = () => {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onUpdate={(updatedUser) => setUser(updatedUser)}
+                forceCompletion={!user?.name || !user?.dob || !user?.phone || !user?.gender}
             />
 
             <TicketDetailsModal

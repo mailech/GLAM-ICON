@@ -102,6 +102,24 @@ const Dashboard = () => {
         window.location.href = '/login';
     };
 
+    const getSocialUrl = (platform, handle) => {
+        if (!handle) return '#';
+        if (handle.startsWith('http')) return handle;
+
+        const cleanHandle = handle.replace('@', ''); // Remove @ if user added it
+
+        switch (platform) {
+            case 'instagram':
+                return `https://instagram.com/${cleanHandle}`;
+            case 'twitter':
+                return `https://x.com/${cleanHandle}`;
+            case 'portfolio':
+                return `https://${cleanHandle}`; // Best guess for portfolio
+            default:
+                return handle;
+        }
+    };
+
     if (loading && tickets.length === 0) return <div className="text-white text-center pt-20">Loading Admin Dashboard...</div>;
 
     const StatsCard = ({ title, value, color, icon }) => (
@@ -344,6 +362,40 @@ const Dashboard = () => {
                                             {ticket.registrationData?.phone && <div>Phone: {ticket.registrationData.phone}</div>}
                                             {ticket.registrationData?.age && <div>Age: {ticket.registrationData.age}</div>}
                                             {ticket.registrationData?.height && <div>Height: {ticket.registrationData.height}</div>}
+
+                                            {/* Social Links */}
+                                            <div className="flex flex-wrap gap-2 mt-3">
+                                                {ticket.registrationData?.socialLinks?.instagram && (
+                                                    <a
+                                                        href={getSocialUrl('instagram', ticket.registrationData.socialLinks.instagram)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-2 py-1 bg-pink-600/20 text-pink-400 border border-pink-600/30 rounded text-xs font-bold uppercase hover:bg-pink-600 hover:text-white transition flex items-center gap-1"
+                                                    >
+                                                        Instagram
+                                                    </a>
+                                                )}
+                                                {ticket.registrationData?.socialLinks?.twitter && (
+                                                    <a
+                                                        href={getSocialUrl('twitter', ticket.registrationData.socialLinks.twitter)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-2 py-1 bg-blue-400/20 text-blue-400 border border-blue-400/30 rounded text-xs font-bold uppercase hover:bg-blue-400 hover:text-white transition flex items-center gap-1"
+                                                    >
+                                                        Twitter
+                                                    </a>
+                                                )}
+                                                {ticket.registrationData?.socialLinks?.portfolio && (
+                                                    <a
+                                                        href={getSocialUrl('portfolio', ticket.registrationData.socialLinks.portfolio)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-2 py-1 bg-purple-600/20 text-purple-400 border border-purple-600/30 rounded text-xs font-bold uppercase hover:bg-purple-600 hover:text-white transition flex items-center gap-1"
+                                                    >
+                                                        Portfolio
+                                                    </a>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex flex-col gap-2 text-xs">

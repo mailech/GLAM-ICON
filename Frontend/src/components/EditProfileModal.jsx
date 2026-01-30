@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
 
-const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
+const EditProfileModal = ({ user, isOpen, onClose, onUpdate, forceCompletion = false }) => {
     // ... (rest of state)
     const [formData, setFormData] = useState({
         name: user?.name || '',
         bio: user?.bio || '',
         phone: user?.phone || '',
         gender: user?.gender || '',
+        dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
         instagram: user?.socialLinks?.instagram || '',
         twitter: user?.socialLinks?.twitter || '',
         portfolio: user?.socialLinks?.portfolio || '',
@@ -35,6 +36,13 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Strict Client-Side Validation for Mandatory Fields
+        if (!formData.name || !formData.phone || !formData.dob || !formData.gender) {
+            alert("Please fill in all mandatory fields marked with *");
+            return;
+        }
+
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -45,6 +53,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
             data.append('bio', formData.bio);
             data.append('phone', formData.phone);
             data.append('gender', formData.gender);
+            data.append('dob', formData.dob); // Add dob to form data
 
             // Append nested social links as JSON string for reliable backend parsing
             const socialLinks = {
@@ -109,22 +118,22 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Full Name</label>
+                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Full Name*</label>
                                 <input
                                     type="text" name="name" value={formData.name} onChange={handleChange}
                                     className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Date of Birth</label>
+                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Date of Birth*</label>
                                 <input
-                                    type="date" name="dob" value={formData.dob ? new Date(formData.dob).toISOString().split('T')[0] : ''} onChange={handleChange}
+                                    type="date" name="dob" value={formData.dob} onChange={handleChange}
                                     style={{ colorScheme: 'dark' }}
                                     className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Phone Number</label>
+                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Phone Number*</label>
                                 <input
                                     type="text" name="phone" value={formData.phone} onChange={handleChange}
                                     className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
@@ -142,7 +151,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Gender</label>
+                            <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Gender*</label>
                             <select
                                 name="gender" value={formData.gender} onChange={handleChange}
                                 className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition appearance-none"
@@ -174,7 +183,9 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate }) => {
                         </div>
 
                         <div className="pt-6 flex justify-end gap-4">
-                            <button type="button" onClick={onClose} className="px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition">Cancel</button>
+                            {!forceCompletion && (
+                                <button type="button" onClick={onClose} className="px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition">Cancel</button>
+                            )}
                             <button
                                 type="submit"
                                 disabled={loading}

@@ -78,7 +78,12 @@ const ticketSchema = new mongoose.Schema({
       enum: ['pending', 'completed', 'failed'],
       default: 'pending'
     },
-    paymentAmount: Number
+    paymentAmount: Number,
+    socialLinks: {
+      instagram: String,
+      twitter: String,
+      portfolio: String
+    }
   },
   applicationStatus: {
     type: String,
