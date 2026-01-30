@@ -182,29 +182,32 @@ exports.exportTicketsExcel = catchAsync(async (req, res, next) => {
         { header: 'Name', key: 'name', width: 30 },
         { header: 'Email', key: 'email', width: 30 },
         { header: 'Phone', key: 'phone', width: 15 },
-        { header: 'Height', key: 'height', width: 15 },
-        { header: 'Weight', key: 'weight', width: 15 },
-        { header: 'Bust', key: 'bust', width: 10 },
-        { header: 'Waist', key: 'waist', width: 10 },
-        { header: 'Hips', key: 'hips', width: 10 },
-        { header: 'Shoe Size', key: 'shoeSize', width: 10 },
-        { header: 'Description', key: 'description', width: 40 },
+        { header: 'Gender', key: 'gender', width: 10 },
+        { header: 'Parents Name', key: 'parentsName', width: 25 },
+        { header: 'Parents Phone', key: 'parentsNumber', width: 15 },
+        { header: 'Address', key: 'address', width: 35 },
+        { header: 'City', key: 'city', width: 15 },
+        { header: 'State', key: 'state', width: 15 },
+        { header: 'Pincode', key: 'pincode', width: 10 },
+        { header: 'Description', key: 'description', width: 30 },
         { header: 'Status', key: 'status', width: 15 },
     ];
 
     tickets.forEach(ticket => {
+        const regData = ticket.registrationData || {};
         worksheet.addRow({
             ticketNumber: ticket.ticketNumber,
             name: ticket.user.name,
             email: ticket.user.email,
-            phone: ticket.registrationData?.phone || ticket.user.phone,
-            height: ticket.registrationData?.height || '-',
-            weight: ticket.registrationData?.weight || '-',
-            bust: ticket.registrationData?.bust || '-',
-            waist: ticket.registrationData?.waist || '-',
-            hips: ticket.registrationData?.hips || '-',
-            shoeSize: ticket.registrationData?.shoeSize || '-',
-            description: ticket.registrationData?.description || '-',
+            phone: regData.phone || ticket.user.phone,
+            gender: regData.gender || '-',
+            parentsName: regData.parentsName || '-',
+            parentsNumber: regData.parentsNumber || '-',
+            address: regData.address || '-',
+            city: regData.city || '-',
+            state: regData.state || '-',
+            pincode: regData.pincode || '-',
+            description: regData.description || '-',
             status: ticket.applicationStatus
         });
     });
@@ -248,6 +251,19 @@ exports.submitPhase2 = catchAsync(async (req, res, next) => {
         hips: req.body.hips,
         shoeSize: req.body.shoeSize,
         description: req.body.description,
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        address: req.body.address,
+        parentsName: req.body.parentsName,
+        parentsNumber: req.body.parentsNumber,
+        gender: req.body.gender,
+        state: req.body.state,
+        city: req.body.city,
+        pincode: req.body.pincode,
+        paymentId: req.body.paymentId,
+        paymentStatus: req.body.paymentStatus || 'completed', // Assuming frontend only calls this after success
+        paymentAmount: req.body.amount,
     };
 
     // Update ticket

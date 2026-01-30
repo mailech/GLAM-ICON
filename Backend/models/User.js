@@ -60,7 +60,8 @@ const userSchema = new mongoose.Schema({
   },
   memberId: {
     type: String,
-    unique: true
+    unique: true,
+    sparse: true
   },
   applicationStatus: {
     type: String,

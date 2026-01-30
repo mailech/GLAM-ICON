@@ -22,7 +22,7 @@ const storage = new CloudinaryStorage({
             const userId = req.user ? req.user.id : `new-${Date.now()}`;
             return `user-${userId}-${Date.now()}`;
         },
-        transformation: [{ width: 500, height: 500, crop: 'limit' }]
+        transformation: [{ width: 300, height: 300, crop: 'limit', quality: 'auto', fetch_format: 'auto' }]
     },
 });
 

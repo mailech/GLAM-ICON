@@ -31,8 +31,8 @@
     /* Slate 100 */
     --color-text-secondary: 148 163 184;
     /* Slate 400 */
-    --color-border: 255 255 255;
     /* White with opacity to be handled in utility */
+    color-scheme: dark;
   }
 
   body {

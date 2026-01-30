@@ -7,6 +7,11 @@ const router = express.Router({ mergeParams: true });
 // Protect all routes after this middleware
 router.use(authController.protect);
 
+const paymentController = require('../controllers/paymentController');
+
+// Payment Routes
+router.post('/create-order', paymentController.createOrder);
+
 router
     .route('/')
     .get(ticketController.getMyTickets)

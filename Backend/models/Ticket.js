@@ -64,7 +64,21 @@ const ticketSchema = new mongoose.Schema({
     measurements: String,
     name: String,
     email: String,
-    phone: String
+    phone: String,
+    address: String,
+    parentsName: String,
+    parentsNumber: String,
+    gender: String,
+    state: String,
+    city: String,
+    pincode: String,
+    paymentId: String,
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending'
+    },
+    paymentAmount: Number
   },
   applicationStatus: {
     type: String,

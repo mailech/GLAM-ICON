@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import EventBookingModal from '../components/EventBookingModal';
+import StatusModal from '../components/StatusModal';
 
 const Events = () => {
     const [events, setEvents] = useState([]);
@@ -11,6 +12,7 @@ const Events = () => {
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [user, setUser] = useState(null); // To pass to modal
+    const [statusModal, setStatusModal] = useState({ isOpen: false });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -63,18 +65,42 @@ const Events = () => {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Booking Successful! Check your profile for tickets.');
+
             setIsBookingModalOpen(false);
-            navigate('/profile');
+            setStatusModal({
+                isOpen: true,
+                type: 'success',
+                title: 'Spot Secured!',
+                message: 'Your registration was successful. You can view your ticket in your profile.',
+                actionLabel: 'View Ticket',
+                onAction: () => navigate('/profile')
+            });
+
         } catch (err) {
             console.error('Booking failed', err);
             const msg = err.response?.data?.message || 'Booking failed.';
+
             if (msg.includes('invalid signature') || msg.includes('jwt malformed') || err.response?.status === 401) {
-                alert('Your session has expired. Please log in again.');
-                localStorage.removeItem('token');
-                navigate('/login');
+                setStatusModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: 'Session Expired',
+                    message: 'Please log in again to continue.',
+                    actionLabel: 'Log In',
+                    onAction: () => {
+                        localStorage.removeItem('token');
+                        navigate('/login');
+                    }
+                });
             } else {
-                alert(msg);
+                setStatusModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: 'Booking Request Failed',
+                    message: msg,
+                    actionLabel: 'Got it',
+                    onAction: null // Just close
+                });
             }
         }
     };
@@ -111,6 +137,16 @@ const Events = () => {
                 onClose={() => setIsBookingModalOpen(false)}
                 onConfirm={handleBookingConfirm}
                 user={user}
+            />
+
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
+                actionLabel={statusModal.actionLabel}
+                onAction={statusModal.onAction}
             />
 
             <div className="max-w-7xl mx-auto">
