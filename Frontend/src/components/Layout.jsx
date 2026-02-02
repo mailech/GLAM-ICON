@@ -155,73 +155,93 @@ const Layout = () => {
       </main>
 
       {/* Enhanced Footer (Mobile Optimized) */}
-      <footer className="bg-surface border-t border-border pt-12 md:pt-20 pb-8 md:pb-10 px-6 mt-auto">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 md:gap-12 mb-12 md:mb-16">
+      <footer className="bg-surface border-t border-border mt-auto relative">
 
-          {/* Brand Column - Full width on mobile */}
-          <div className="col-span-2 md:col-span-1 space-y-4 md:space-y-6">
-            <Link to="/" className="text-xl md:text-2xl font-display font-bold text-text-primary tracking-widest uppercase flex items-center gap-2">
-              <span className="w-1.5 h-5 md:h-6 bg-secondary-500 block"></span>
-              GLAM ICONIC INDIA
-            </Link>
-            <p className="text-text-secondary text-sm leading-relaxed font-light max-w-sm">
-              India's premier digital platform for the fashion elite.
-              Bridging the gap between aspiring models, designers, and the world stage.
-            </p>
-            <div className="flex gap-4">
-              {['Instagram', 'Twitter', 'LinkedIn'].map(social => (
-                <a key={social} href="#" className="w-8 h-8 rounded-full bg-surface-highlight flex items-center justify-center text-text-secondary hover:bg-secondary-600 hover:text-white transition text-xs">
-                  {social[0]}
-                </a>
-              ))}
+        {/* --- SPONSORS STATIC SECTION --- */}
+        <div className="border-y border-white/10 py-12 bg-black relative z-10">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-center text-secondary-500 font-bold tracking-[0.3em] uppercase mb-8 text-xs">Official Sponsors</p>
+            <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-80">
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">VOGUE</span>
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">ELLE</span>
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">HARPER'S BAZAAR</span>
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">COSMOPOLITAN</span>
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">FEMINA</span>
+              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">GRAZIA</span>
             </div>
           </div>
-
-          {/* Links 1 - Left column on mobile */}
-          <div className="col-span-1">
-            <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Explore</h4>
-            <ul className="space-y-3 md:space-y-4 text-xs font-medium text-text-secondary uppercase tracking-wide">
-              <li><Link to="/events" className="hover:text-secondary-400 transition">Fashion Weeks</Link></li>
-              <li><Link to="/events" className="hover:text-secondary-400 transition">Model Hunts</Link></li>
-              <li><a href="#" className="hover:text-secondary-400 transition">Designers</a></li>
-              <li><a href="#" className="hover:text-secondary-400 transition">Gallery</a></li>
-            </ul>
-          </div>
-
-          {/* Links 2 - Right column on mobile */}
-          <div className="col-span-1">
-            <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Company</h4>
-            <ul className="space-y-3 md:space-y-4 text-xs font-medium text-text-secondary uppercase tracking-wide">
-              <li><a href="#" className="hover:text-secondary-400 transition">About Us</a></li>
-              <li><a href="#" className="hover:text-secondary-400 transition">Careers</a></li>
-              <li><a href="#" className="hover:text-secondary-400 transition">Contact</a></li>
-              <li><a href="#" className="hover:text-secondary-400 transition">Partners</a></li>
-            </ul>
-          </div>
-
-          {/* Newsletter - Full width on mobile */}
-          <div className="col-span-2 md:col-span-1">
-            <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Insiders</h4>
-            <p className="text-text-secondary text-xs mb-4">Subscribe for exclusive invites and updates.</p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="EMAIL ADDRESS"
-                className="bg-background border border-border border-r-0 rounded-l-lg px-4 py-3 text-xs text-text-primary w-full outline-none focus:bg-surface-highlight transition"
-              />
-              <button className="bg-secondary-600 text-white px-4 py-3 rounded-r-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-500 transition">
-                Join
-              </button>
-            </div>
-          </div>
-
         </div>
 
-        <div className="max-w-7xl mx-auto border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] md:text-xs text-text-secondary uppercase tracking-wider text-center md:text-left">
-          <p>&copy; 2026 Glam Iconic India. All rights reserved.</p>
-          <div className="flex gap-6 md:gap-8">
-            <a href="#" className="hover:text-text-primary transition">Privacy Policy</a>
-            <a href="#" className="hover:text-text-primary transition">Terms of Service</a>
+        <div className="pt-12 md:pt-20 pb-8 md:pb-10 px-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 md:gap-12 mb-12 md:mb-16">
+
+            {/* Brand Column */}
+            <div className="col-span-2 md:col-span-1 space-y-4 md:space-y-6">
+              <Link to="/" className="text-xl md:text-2xl font-display font-bold text-text-primary tracking-widest uppercase flex items-center gap-2">
+                <span className="w-1.5 h-5 md:h-6 bg-secondary-500 block"></span>
+                GLAM ICONIC INDIA
+              </Link>
+              <p className="text-text-secondary text-sm leading-relaxed font-light max-w-sm">
+                India's premier digital platform for the fashion elite.
+                Bridging the gap between aspiring models, designers, and the world stage.
+              </p>
+              <div className="flex gap-4">
+                {['Instagram', 'Twitter', 'LinkedIn'].map(social => (
+                  <a key={social} href="#" className="w-8 h-8 rounded-full bg-surface-highlight flex items-center justify-center text-text-secondary hover:bg-secondary-600 hover:text-white transition text-xs">
+                    {social[0]}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Links 1 */}
+            <div className="col-span-1">
+              <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Explore</h4>
+              <ul className="space-y-3 md:space-y-4 text-xs font-medium text-text-secondary uppercase tracking-wide">
+                <li><Link to="/events" className="hover:text-secondary-400 transition">Fashion Weeks</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Model Hunts</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Designers</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Gallery</Link></li>
+              </ul>
+            </div>
+
+            {/* Links 2 */}
+            <div className="col-span-1">
+              <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Company</h4>
+              <ul className="space-y-3 md:space-y-4 text-xs font-medium text-text-secondary uppercase tracking-wide">
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">About Us</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Careers</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Contact</Link></li>
+                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Sponsors</Link></li>
+                {/* <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Chutiya</Link></li> */}
+
+              </ul>
+            </div>
+
+            {/* Newsletter */}
+            <div className="col-span-2 md:col-span-1">
+              <h4 className="text-text-primary font-bold text-xs md:text-sm uppercase tracking-widest mb-4 md:mb-6">Insiders</h4>
+              <p className="text-text-secondary text-xs mb-4">Subscribe for exclusive invites and updates.</p>
+              <div className="flex">
+                <input
+                  type="email"
+                  placeholder="EMAIL ADDRESS"
+                  className="bg-background border border-border border-r-0 rounded-l-lg px-4 py-3 text-xs text-text-primary w-full outline-none focus:bg-surface-highlight transition"
+                />
+                <button className="bg-secondary-600 text-white px-4 py-3 rounded-r-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-500 transition">
+                  Join
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="max-w-7xl mx-auto border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] md:text-xs text-text-secondary uppercase tracking-wider text-center md:text-left">
+            <p>&copy; 2026 Glam Iconic India. All rights reserved.</p>
+            <div className="flex gap-6 md:gap-8">
+              <Link to="/coming-soon" className="hover:text-text-primary transition">Privacy Policy</Link>
+              <Link to="/coming-soon" className="hover:text-text-primary transition">Terms of Service</Link>
+            </div>
           </div>
         </div>
       </footer>

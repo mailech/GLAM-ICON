@@ -229,7 +229,7 @@ const Phase2Form = () => {
     }
 
     return (
-        <div className="min-h-screen bg-dark-950 text-white flex items-center justify-center py-20 px-4 relative">
+        <div className="min-h-screen bg-dark-950 text-white flex items-center justify-center pt-32 pb-20 px-4 relative">
             {/* Background Decoration */}
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-secondary-900/20 to-transparent pointer-events-none"></div>
 

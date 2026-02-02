@@ -11,6 +11,8 @@ const Register = lazy(() => import('./pages/Register'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Events = lazy(() => import('./pages/Events'));
 const Phase2Form = lazy(() => import('./pages/Phase2Form'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ComingSoon = lazy(() => import('./pages/ComingSoon'));
 
 function App() {
   return (
@@ -22,7 +24,7 @@ function App() {
       }>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+            <Route index element={<HomePage />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route element={<ProtectedRoute />}>
