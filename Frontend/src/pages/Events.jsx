@@ -130,7 +130,7 @@ const Events = () => {
     );
 
     return (
-        <div className="min-h-screen pt-28 pb-16 px-4 bg-dark-900">
+        <div className="min-h-screen pt-28 pb-16 px-4 bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500">
             <EventBookingModal
                 event={selectedEvent}
                 isOpen={isBookingModalOpen}
@@ -151,8 +151,8 @@ const Events = () => {
 
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
-                    <h1 className="text-3xl md:text-6xl font-display font-bold mb-4 text-white">Upcoming <span className="text-gold italic">Collections</span></h1>
-                    <p className="text-gray-400 max-w-2xl mx-auto font-light">Select an exclusive event to attend. Use your membership pass for instant access.</p>
+                    <h1 className="text-3xl md:text-6xl font-display font-bold mb-4 text-zinc-900 dark:text-white transition-colors">Upcoming <span className="text-secondary-600 dark:text-gold italic">Collections</span></h1>
+                    <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto font-light">Select an exclusive event to attend. Use your membership pass for instant access.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -162,7 +162,7 @@ const Events = () => {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.15, duration: 0.6 }}
-                            className="group bg-dark-800 rounded-xl overflow-hidden border border-white/5 hover:border-secondary-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 flex flex-col h-full"
+                            className="group bg-white dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/5 hover:border-secondary-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-black/10 dark:hover:shadow-black/50 flex flex-col h-full"
                         >
                             <div className="h-64 overflow-hidden relative shrink-0 bg-zinc-800">
                                 <img
@@ -179,18 +179,18 @@ const Events = () => {
                             </div>
 
                             <div className="p-8 relative -mt-12 flex flex-col grow">
-                                <div className="bg-dark-800/80 backdrop-blur-sm p-4 rounded-lg border border-white/5 mb-4">
-                                    <h3 className="text-2xl font-display font-bold text-white mb-1 group-hover:text-secondary-400 transition-colors line-clamp-1">{event.title}</h3>
-                                    <p className="text-secondary-500 text-xs uppercase tracking-widest font-bold line-clamp-1">{event.location?.address || 'Location TBA'}</p>
+                                <div className="bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm p-4 rounded-lg border border-zinc-200 dark:border-white/5 mb-4 shadow-lg dark:shadow-none">
+                                    <h3 className="text-2xl font-display font-bold text-zinc-900 dark:text-white mb-1 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition-colors line-clamp-1">{event.title}</h3>
+                                    <p className="text-secondary-600 dark:text-secondary-500 text-xs uppercase tracking-widest font-bold line-clamp-1">{event.location?.address || 'Location TBA'}</p>
                                 </div>
 
-                                <p className="text-gray-400 text-sm mb-8 font-light leading-relaxed line-clamp-3 grow">{event.description}</p>
+                                <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-8 font-light leading-relaxed line-clamp-3 grow">{event.description}</p>
 
                                 <div className="flex items-center justify-between mt-auto gap-4">
-                                    <span className="text-white font-display font-bold text-xl">₹{event.price}</span>
+                                    <span className="text-zinc-900 dark:text-white font-display font-bold text-xl">₹{event.price}</span>
                                     <button
                                         onClick={() => handleOpenBooking(event)}
-                                        className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-600 hover:border-secondary-600 transition-all duration-300"
+                                        className="px-6 py-3 bg-zinc-900 dark:bg-white/5 border border-zinc-900 dark:border-white/10 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-secondary-600 hover:border-secondary-600 dark:hover:bg-secondary-600 dark:hover:border-secondary-600 transition-all duration-300"
                                     >
                                         Reserve Seat
                                     </button>
