@@ -13,6 +13,7 @@ const Events = lazy(() => import('./pages/Events'));
 const Phase2Form = lazy(() => import('./pages/Phase2Form'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             </Route>
             <Route path="events" element={<Events />} />
             <Route path="phase-2-registration" element={<Phase2Form />} />
+            <Route path="contact" element={<ContactPage />} />
           </Route>
         </Routes>
       </Suspense>

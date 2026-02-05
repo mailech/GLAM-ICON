@@ -106,14 +106,14 @@ const Events = () => {
     };
 
     const getEventImage = (event) => {
-        // Specific fallbacks for known events if their image is missing or broken
-        if (event.title.includes('Mumbai Fashion Week')) return 'https://images.unsplash.com/photo-1576403233400-985429acb76d?q=80&w=1350&auto=format&fit=crop';
-        if (event.title.includes('Elite Model Hunt')) return 'https://images.unsplash.com/photo-1509631180846-36e3471803f1?q=80&w=675&auto=format&fit=crop';
-        if (event.title.includes('Abstract Art')) return 'https://images.unsplash.com/photo-1472653816316-3ad6f10a6592?q=80&w=1350&auto=format&fit=crop';
-        if (event.title.includes('Sustainable')) return 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1225&auto=format&fit=crop';
+        // Specific fallbacks for known events with reliable high-quality images
+        if (event.title.includes('Mumbai Fashion Week')) return 'https://images.unsplash.com/photo-1569388330292-79cc1ec67270?q=80&w=2070&auto=format&fit=crop';
+        if (event.title.includes('Elite Model Hunt')) return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop';
+        if (event.title.includes('Abstract Art')) return 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=2070&auto=format&fit=crop';
+        if (event.title.includes('Sustainable')) return 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070&auto=format&fit=crop';
 
         // General handling
-        if (!event.imageCover) return "https://images.unsplash.com/photo-1492684223066-81342ee5ff30";
+        if (!event.imageCover) return "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop";
         if (event.imageCover.startsWith('http')) return event.imageCover;
         return `/img/events/${event.imageCover}`;
     };
@@ -164,8 +164,13 @@ const Events = () => {
                             transition={{ delay: index * 0.15, duration: 0.6 }}
                             className="group bg-dark-800 rounded-xl overflow-hidden border border-white/5 hover:border-secondary-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 flex flex-col h-full"
                         >
-                            <div className="h-64 overflow-hidden relative shrink-0">
-                                <img src={getEventImage(event)} alt={event.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                            <div className="h-64 overflow-hidden relative shrink-0 bg-zinc-800">
+                                <img
+                                    src={getEventImage(event)}
+                                    alt={event.title}
+                                    onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop"; }}
+                                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-90"></div>
 
                                 <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded text-xs font-bold uppercase tracking-widest text-white border border-white/20">

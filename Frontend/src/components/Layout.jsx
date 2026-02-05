@@ -122,6 +122,7 @@ const Layout = () => {
               transition={{ duration: 0.2 }}
               className="absolute top-full left-0 w-full bg-surface border-b border-border shadow-2xl md:hidden flex flex-col items-center py-6"
             >
+              <NavLink to="/" mobile>Home</NavLink>
               <NavLink to="/events" mobile>Events</NavLink>
               {token ? (
                 <>
@@ -150,27 +151,14 @@ const Layout = () => {
         </AnimatePresence>
       </header>
 
-      <main className="relative z-0 grow">
+      <main className="relative grow">
         <Outlet />
       </main>
 
       {/* Enhanced Footer (Mobile Optimized) */}
       <footer className="bg-surface border-t border-border mt-auto relative">
 
-        {/* --- SPONSORS STATIC SECTION --- */}
-        <div className="border-y border-white/10 py-12 bg-black relative z-10">
-          <div className="max-w-7xl mx-auto px-6">
-            <p className="text-center text-secondary-500 font-bold tracking-[0.3em] uppercase mb-8 text-xs">Official Sponsors</p>
-            <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-80">
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">VOGUE</span>
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">ELLE</span>
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">HARPER'S BAZAAR</span>
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">COSMOPOLITAN</span>
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">FEMINA</span>
-              <span className="text-xl md:text-3xl font-display font-medium text-white hover:text-secondary-400 transition-colors cursor-default">GRAZIA</span>
-            </div>
-          </div>
-        </div>
+
 
         <div className="pt-12 md:pt-20 pb-8 md:pb-10 px-6">
           <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 md:gap-12 mb-12 md:mb-16">
@@ -211,7 +199,7 @@ const Layout = () => {
               <ul className="space-y-3 md:space-y-4 text-xs font-medium text-text-secondary uppercase tracking-wide">
                 <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">About Us</Link></li>
                 <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Careers</Link></li>
-                <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Contact</Link></li>
+                <li><Link to="/contact" className="hover:text-secondary-400 transition">Contact</Link></li>
                 <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Sponsors</Link></li>
                 {/* <li><Link to="/coming-soon" className="hover:text-secondary-400 transition">Chutiya</Link></li> */}
 

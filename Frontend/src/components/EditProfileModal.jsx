@@ -84,15 +84,15 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, forceCompletion = f
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-dark-900 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col"
+                className="bg-surface border border-border rounded-2xl w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col"
             >
                 {/* Header - Fixed */}
-                <div className="bg-dark-800 p-4 border-b border-white/10 flex justify-between items-center shrink-0 z-50">
-                    <h2 className="text-xl font-display font-bold text-white">Edit Profile</h2>
+                <div className="bg-surface-highlight p-4 border-b border-border flex justify-between items-center shrink-0 z-50 rounded-t-2xl">
+                    <h2 className="text-xl font-display font-bold text-text-primary">Edit Profile</h2>
                 </div>
 
                 {/* Scrollable Content */}
@@ -101,60 +101,60 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, forceCompletion = f
 
                         {/* Photo Upload Section */}
                         <div className="flex items-center gap-6">
-                            <div className="w-20 h-20 rounded-full overflow-hidden border border-white/20 shrink-0">
+                            <div className="w-20 h-20 rounded-full overflow-hidden border border-border shrink-0">
                                 <img src={preview} alt="Profile Preview" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1">
-                                <label className="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Profile Photo</label>
+                                <label className="block text-xs uppercase tracking-widest text-text-secondary font-bold mb-2">Profile Photo</label>
                                 <input
                                     type="file"
                                     name="photo"
                                     accept="image/*"
                                     onChange={handleChange}
-                                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500 transition cursor-pointer"
+                                    className="block w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500 transition cursor-pointer"
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Full Name*</label>
+                                <label className="text-xs uppercase tracking-widest text-text-secondary font-bold">Full Name*</label>
                                 <input
                                     type="text" name="name" value={formData.name} onChange={handleChange}
-                                    className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
+                                    className="w-full bg-background border border-border rounded-lg p-3 text-text-primary focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Date of Birth*</label>
+                                <label className="text-xs uppercase tracking-widest text-text-secondary font-bold">Date of Birth*</label>
                                 <input
                                     type="date" name="dob" value={formData.dob} onChange={handleChange}
                                     style={{ colorScheme: 'dark' }}
-                                    className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
+                                    className="w-full bg-background border border-border rounded-lg p-3 text-text-primary focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Phone Number*</label>
+                                <label className="text-xs uppercase tracking-widest text-text-secondary font-bold">Phone Number*</label>
                                 <input
                                     type="text" name="phone" value={formData.phone} onChange={handleChange}
-                                    className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition"
+                                    className="w-full bg-background border border-border rounded-lg p-3 text-text-primary focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Bio</label>
+                            <label className="text-xs uppercase tracking-widest text-text-secondary font-bold">Bio</label>
                             <textarea
                                 name="bio" value={formData.bio} onChange={handleChange} rows="3"
-                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition resize-none"
+                                className="w-full bg-background border border-border rounded-lg p-3 text-text-primary focus:border-secondary-500 outline-none transition resize-none"
                                 placeholder="Tell us a bit about your glam journey..."
                             ></textarea>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-400 font-bold">Gender*</label>
+                            <label className="text-xs uppercase tracking-widest text-text-secondary font-bold">Gender*</label>
                             <select
                                 name="gender" value={formData.gender} onChange={handleChange}
-                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-3 text-white focus:border-secondary-500 outline-none transition appearance-none"
+                                className="w-full bg-background border border-border rounded-lg p-3 text-text-primary focus:border-secondary-500 outline-none transition appearance-none"
                             >
                                 <option value="">Select Gender</option>
                                 <option value="Male">Male</option>
@@ -164,27 +164,27 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, forceCompletion = f
                             </select>
                         </div>
 
-                        <div className="border-t border-white/10 pt-6">
+                        <div className="border-t border-border pt-6">
                             <h3 className="text-sm font-bold text-secondary-500 mb-4 uppercase tracking-wider">Social Presence</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <input
                                     type="text" name="instagram" placeholder="Instagram Username" value={formData.instagram} onChange={handleChange}
-                                    className="bg-dark-800 border border-white/10 rounded-lg p-3 text-white text-sm"
+                                    className="bg-background border border-border rounded-lg p-3 text-text-primary text-sm focus:border-secondary-500 outline-none transition"
                                 />
                                 <input
                                     type="text" name="twitter" placeholder="X (Twitter) Username" value={formData.twitter} onChange={handleChange}
-                                    className="bg-dark-800 border border-white/10 rounded-lg p-3 text-white text-sm"
+                                    className="bg-background border border-border rounded-lg p-3 text-text-primary text-sm focus:border-secondary-500 outline-none transition"
                                 />
                                 <input
                                     type="text" name="portfolio" placeholder="Portfolio URL" value={formData.portfolio} onChange={handleChange}
-                                    className="bg-dark-800 border border-white/10 rounded-lg p-3 text-white text-sm"
+                                    className="bg-background border border-border rounded-lg p-3 text-text-primary text-sm focus:border-secondary-500 outline-none transition"
                                 />
                             </div>
                         </div>
 
                         <div className="pt-6 flex justify-end gap-4">
                             {!forceCompletion && (
-                                <button type="button" onClick={onClose} className="px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition">Cancel</button>
+                                <button type="button" onClick={onClose} className="px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest text-text-secondary hover:text-text-primary hover:bg-surface-highlight transition">Cancel</button>
                             )}
                             <button
                                 type="submit"

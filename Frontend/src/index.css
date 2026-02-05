@@ -4,34 +4,35 @@
 
 @layer base {
   :root {
-    /* Light Mode Default */
-    --color-background: 248 250 252;
-    /* Slate 50 */
+    /* Light Mode - Premium Slate/White Theme */
+    --color-background: 249 250 251;
+    /* Gray 50 */
     --color-surface: 255 255 255;
     /* White */
-    --color-surface-highlight: 241 245 249;
-    /* Slate 100 */
-    --color-text-primary: 15 23 42;
-    /* Slate 900 */
-    --color-text-secondary: 71 85 105;
-    /* Slate 600 */
-    --color-border: 226 232 240;
-    /* Slate 200 */
+    --color-surface-highlight: 243 244 246;
+    /* Gray 100 */
+    --color-text-primary: 17 24 39;
+    /* Gray 900 */
+    --color-text-secondary: 75 85 99;
+    /* Gray 600 */
+    --color-border: 229 231 235;
+    /* Gray 200 */
   }
 
   .dark {
-    /* Dark Mode Override */
-    --color-background: 12 12 14;
-    /* Custom Dark 900 */
-    --color-surface: 28 28 30;
-    /* Custom Dark 800 */
-    --color-surface-highlight: 44 44 46;
-    /* Custom Dark 700 */
-    --color-text-primary: 241 245 249;
-    /* Slate 100 */
-    --color-text-secondary: 148 163 184;
-    /* Slate 400 */
-    /* White with opacity to be handled in utility */
+    /* Dark Mode - Premium Zinc/Black Theme */
+    --color-background: 9 9 11;
+    /* Zinc 950 */
+    --color-surface: 24 24 27;
+    /* Zinc 900 */
+    --color-surface-highlight: 39 39 42;
+    /* Zinc 800 */
+    --color-text-primary: 250 250 250;
+    /* Zinc 50 */
+    --color-text-secondary: 161 161 170;
+    /* Zinc 400 */
+    --color-border: 39 39 42;
+    /* Zinc 800 */
     color-scheme: dark;
   }
 
