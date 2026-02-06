@@ -145,36 +145,39 @@ const Profile = () => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
-                        className="relative shrink-0"
+                        className="flex flex-col items-center gap-4 shrink-0"
                     >
-                        <div className="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-br from-secondary-400 to-transparent shadow-xl">
-                            <img
-                                src={user?.photo && user?.photo !== 'default.jpg'
-                                    ? (user.photo.startsWith('http') ? user.photo : `/img/users/${user.photo}`)
-                                    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
-                                alt="Profile"
-                                className="w-full h-full rounded-full bg-surface-highlight object-cover"
-                            />
+                        <div className="relative">
+                            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-br from-secondary-400 to-transparent shadow-xl">
+                                <img
+                                    src={user?.photo && user?.photo !== 'default.jpg'
+                                        ? (user.photo.startsWith('http') ? user.photo : `/img/users/${user.photo}`)
+                                        : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
+                                    alt="Profile"
+                                    className="w-full h-full rounded-full bg-surface-highlight object-cover"
+                                />
+                            </div>
+                            <button
+                                onClick={() => setIsEditModalOpen(true)}
+                                className="absolute bottom-1 right-1 bg-surface text-text-secondary p-2 rounded-full border border-border hover:text-text-primary transition shadow-lg z-20 hover:scale-110 active:scale-95"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                    <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                    <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                                </svg>
+                            </button>
                         </div>
+
                         {user.memberId && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.5, type: 'spring' }}
-                                className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-dark-950 text-gold text-[10px] font-bold px-3 py-1 rounded-full border border-gold/30 whitespace-nowrap shadow-lg z-10"
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="bg-dark-950 text-gold text-[10px] font-bold px-3 py-1 rounded-full border border-gold/30 whitespace-nowrap shadow-lg"
                             >
                                 {user.memberId}
                             </motion.div>
                         )}
-                        <button
-                            onClick={() => setIsEditModalOpen(true)}
-                            className="absolute bottom-1 right-1 bg-surface text-text-secondary p-2 rounded-full border border-border hover:text-text-primary transition shadow-lg z-20 hover:scale-110 active:scale-95"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                                <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                            </svg>
-                        </button>
                     </motion.div>
 
                     {/* User Info */}

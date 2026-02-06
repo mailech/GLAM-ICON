@@ -72,7 +72,7 @@ const TicketCard = ({ ticket, user, onClick }) => {
                                     <div className="bg-white/5 rounded-lg p-3 border border-white/5">
                                         <p className="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Status</p>
                                         <p className={`text-xs font-bold uppercase ${ticket.applicationStatus === 'shortlisted' ? 'text-green-400' :
-                                                ticket.applicationStatus === 'rejected' ? 'text-red-400' : 'text-yellow-400'
+                                            ticket.applicationStatus === 'rejected' ? 'text-red-400' : 'text-yellow-400'
                                             }`}>
                                             {ticket.applicationStatus || 'In Review'}
                                         </p>
@@ -189,7 +189,7 @@ const TicketCard = ({ ticket, user, onClick }) => {
             >
                 {/* --- FRONT (Redesigned) --- */}
                 <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] bg-black"
-                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(0deg) translateZ(0.1px)' }}>
 
                     {/* Background: Subtle gradient instead of dust */}
                     <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black"></div>
@@ -209,7 +209,7 @@ const TicketCard = ({ ticket, user, onClick }) => {
                         <div className="relative w-40 h-40 mb-6">
                             {/* Outer Glow Ring */}
                             <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-gold/40 to-transparent blur-sm"></div>
-                            <div className="w-full h-full rounded-full border-2 border-white/10 overflow-hidden bg-gray-800 relative z-10 shadow-2xl">
+                            <div className="w-full h-full rounded-full border-2 border-white/10 overflow-hidden bg-gray-800 relative shadow-2xl">
                                 <img src={getPhotoUrl(user?.photo)} alt="Profile" className="w-full h-full object-cover" />
                             </div>
                             {/* Status Indicator */}
@@ -242,7 +242,7 @@ const TicketCard = ({ ticket, user, onClick }) => {
 
                 {/* --- BACK (QR) --- */}
                 <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl overflow-hidden shadow-2xl bg-[#F5F5F5] flex flex-col items-center justify-center p-8 text-center"
-                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', zIndex: 1 }}>
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(0.1px)', zIndex: 1 }}>
 
                     <div className="w-full border-b border-gray-300 pb-6 mb-8 flex justify-between items-center opacity-80">
                         <div className="text-left">

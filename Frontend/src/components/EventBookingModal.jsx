@@ -13,7 +13,8 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
     const [files, setFiles] = useState({
         profilePhoto: null,
         birthCertificate: null,
-        video: null
+        video: null,
+        walkingVideo: null
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -73,6 +74,10 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
             if (files.video) {
                 uploadPromises.push(uploadToCloudinary(files.video));
                 fileKeys.push('video');
+            }
+            if (files.walkingVideo) {
+                uploadPromises.push(uploadToCloudinary(files.walkingVideo));
+                fileKeys.push('walkingVideo');
             }
 
             const results = await Promise.all(uploadPromises);
@@ -204,30 +209,41 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
                                     </div>
                                 </div>
 
-                                {/* File Uploads */}
                                 <div className="space-y-4 pt-4 border-t border-white/5">
                                     <h5 className="text-secondary-400 text-xs font-bold uppercase tracking-widest">Registration Documents</h5>
 
-                                    <div className="space-y-2">
-                                        <label className="text-xs text-gray-500 uppercase font-bold">Profile Photo</label>
-                                        <input
-                                            type="file" name="profilePhoto" onChange={handleFileChange} accept="image/*"
-                                            className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
-                                        />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-gray-500 uppercase font-bold">Profile Photo</label>
+                                            <input
+                                                type="file" name="profilePhoto" onChange={handleFileChange} accept="image/*"
+                                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-gray-500 uppercase font-bold">Birth Certificate</label>
+                                            <input
+                                                type="file" name="birthCertificate" onChange={handleFileChange} accept="image/*,application/pdf"
+                                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs text-gray-500 uppercase font-bold">Birth Certificate</label>
-                                        <input
-                                            type="file" name="birthCertificate" onChange={handleFileChange} accept="image/*,application/pdf"
-                                            className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs text-gray-500 uppercase font-bold">Audition Video</label>
-                                        <input
-                                            type="file" name="video" onChange={handleFileChange} accept="video/*"
-                                            className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
-                                        />
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-gray-500 uppercase font-bold">Intro Video (Introduction)</label>
+                                            <input
+                                                type="file" name="video" onChange={handleFileChange} accept="video/*"
+                                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-gray-500 uppercase font-bold">Walking Video (Ramp Walk)</label>
+                                            <input
+                                                type="file" name="walkingVideo" onChange={handleFileChange} accept="video/*"
+                                                className="w-full bg-dark-800 border border-white/10 rounded-lg p-2 text-gray-400 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-secondary-600 file:text-white hover:file:bg-secondary-500"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
