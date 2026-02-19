@@ -144,7 +144,7 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
   }
 
   const hash = crypto.createHash('sha256').update(otp).digest('hex');
-  if (hash !== user.otp && otp !== '123456') {
+  if (hash !== user.otp) {
     return next(new AppError('Invalid OTP', 400));
   }
 
