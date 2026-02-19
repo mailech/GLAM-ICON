@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
   const [step, setStep] = useState('register'); // 'register' | 'verify'
@@ -17,6 +18,7 @@ const Register = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   // Google Login Logic (simplified wrapper)
@@ -26,7 +28,7 @@ const Register = () => {
       const { credential } = credentialResponse;
       // Send google token to backend
       const res = await api.post('/api/users/google', { token: credential });
-      localStorage.setItem('token', res.data.token);
+      login(res.data.data.user, res.data.token);
       navigate('/profile');
     } catch (err) {
       console.error("Google login failed", err);
@@ -82,7 +84,7 @@ const Register = () => {
           email: formData.email,
           otp
         });
-        localStorage.setItem('token', response.data.token);
+        login(response.data.data.user, response.data.token);
         navigate('/profile');
       } catch (err) {
         setError(err.response?.data?.message || 'Invalid OTP');
