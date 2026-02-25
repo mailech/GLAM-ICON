@@ -59,40 +59,29 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
     const uploadFiles = async () => {
         try {
             setUploading(true);
-
-            const uploadPromises = [];
-            const fileKeys = [];
-
-            if (files.profilePhoto) {
-                uploadPromises.push(uploadToCloudinary(files.profilePhoto));
-                fileKeys.push('profilePhoto');
-            }
-            if (files.birthCertificate) {
-                uploadPromises.push(uploadToCloudinary(files.birthCertificate));
-                fileKeys.push('birthCertificate');
-            }
-            if (files.video) {
-                uploadPromises.push(uploadToCloudinary(files.video));
-                fileKeys.push('video');
-            }
-            if (files.walkingVideo) {
-                uploadPromises.push(uploadToCloudinary(files.walkingVideo));
-                fileKeys.push('walkingVideo');
-            }
-
-            const results = await Promise.all(uploadPromises);
-
             const urls = {};
-            fileKeys.forEach((key, index) => {
-                urls[key] = results[index];
-            });
+
+            // Priority list of keys to ensure we upload in a specific order
+            const fileOrder = ['profilePhoto', 'birthCertificate', 'video', 'walkingVideo'];
+
+            for (const key of fileOrder) {
+                if (files[key]) {
+                    console.log(`Uploading ${key}...`);
+                    try {
+                        const url = await uploadToCloudinary(files[key]);
+                        urls[key] = url;
+                    } catch (fileErr) {
+                        throw new Error(`${key} upload failed: ${fileErr.message}`);
+                    }
+                }
+            }
 
             setUploading(false);
             return urls;
         } catch (err) {
-            console.error('Upload failed', err);
+            console.error('Upload Error:', err);
             setUploading(false);
-            alert(`File upload failed: ${err.message}. Please check console.`);
+            alert(`Upload Error: ${err.message}. \n\nPlease ensure:\n1. Your video files are not too large (try under 10MB).\n2. You have a stable internet connection.`);
             return null;
         }
     };
