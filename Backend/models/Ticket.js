@@ -22,7 +22,7 @@ const ticketSchema = new mongoose.Schema({
   },
   purchaseDate: {
     type: Date,
-    default: Date.now()
+    default: Date.now
   },
   status: {
     type: String,
@@ -53,6 +53,7 @@ const ticketSchema = new mongoose.Schema({
     profilePhoto: String,
     birthCertificate: String,
     video: String,
+    walkingVideo: String,
     age: Number,
     height: String,
     weight: String,
@@ -91,6 +92,8 @@ const ticketSchema = new mongoose.Schema({
     default: 'pending'
   },
   adminFeedback: String
+}, {
+  timestamps: true
 });
 
 // Indexes for better query performance

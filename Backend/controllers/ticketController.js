@@ -5,9 +5,53 @@ const APIFeatures = require('../utils/apiFeatures');
 const factory = require('./handlerFactory');
 
 exports.getAllTickets = catchAsync(async (req, res, next) => {
-    // Reverted to DB fetch with debug logging
-    const tickets = await Ticket.find().sort('-createdAt').populate('user').populate('event');
-    console.log(`getAllTickets: Found ${tickets.length} tickets`);
+    let filter = {};
+
+    // 1. Handle Search
+    if (req.query.search) {
+        const searchRegex = new RegExp(req.query.search, 'i');
+        // Find users matching search first to filter tickets by user
+        const User = require('../models/User');
+        const users = await User.find({
+            $or: [
+                { name: searchRegex },
+                { email: searchRegex }
+            ]
+        });
+        const userIds = users.map(u => u._id);
+
+        filter = {
+            $or: [
+                { ticketNumber: searchRegex },
+                { user: { $in: userIds } },
+                { 'registrationData.phone': searchRegex }
+            ]
+        };
+    }
+
+    // 2. Handle Date Filtering
+    if (req.query.date) {
+        // Create range for the entire day in local time
+        const targetDate = new Date(req.query.date);
+        const start = new Date(targetDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(targetDate);
+        end.setHours(23, 59, 59, 999);
+
+        filter.createdAt = {
+            $gte: start,
+            $lte: end
+        };
+    }
+
+    // EXECUTE QUERY
+    const features = new APIFeatures(Ticket.find(filter), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+
+    const tickets = await features.query.populate('user').populate('event');
 
     res.status(200).json({
         status: 'success',
@@ -128,7 +172,32 @@ exports.getTicket = catchAsync(async (req, res, next) => {
 });
 
 exports.getTicketStats = catchAsync(async (req, res, next) => {
+    let match = {};
+
+    // Apply same search/date filters to stats
+    if (req.query.search) {
+        const searchRegex = new RegExp(req.query.search, 'i');
+        const User = require('../models/User');
+        const users = await User.find({
+            $or: [{ name: searchRegex }, { email: searchRegex }]
+        });
+        const userIds = users.map(u => u._id);
+        match.$or = [
+            { ticketNumber: searchRegex },
+            { user: { $in: userIds } },
+            { 'registrationData.phone': searchRegex }
+        ];
+    }
+
+    if (req.query.date) {
+        const date = new Date(req.query.date);
+        const start = new Date(date.setHours(0, 0, 0, 0));
+        const end = new Date(date.setHours(23, 59, 59, 999));
+        match.createdAt = { $gte: start, $lte: end };
+    }
+
     const stats = await Ticket.aggregate([
+        { $match: match },
         {
             $group: {
                 _id: '$applicationStatus',

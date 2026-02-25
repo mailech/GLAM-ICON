@@ -127,19 +127,25 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md sm:p-4">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-dark-900 border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl relative max-h-[90vh] flex flex-col"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                className="bg-dark-900 border-x border-white/10 sm:border sm:rounded-2xl w-full max-w-lg shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] flex flex-col"
             >
                 {/* Header - Fixed at top */}
                 <div className="bg-dark-800 p-4 border-b border-white/10 flex justify-between items-center shrink-0 z-50">
                     <div>
                         <h3 className="text-lg font-display font-bold text-white">Secure Your Spot</h3>
-                        <p className="text-xs text-secondary-400 uppercase tracking-widest truncate max-w-[200px]">{event.title}</p>
+                        <p className="text-xs text-secondary-400 uppercase tracking-widest truncate max-w-[250px]">{event.title}</p>
                     </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-400 hover:text-white sm:hidden"
+                    >
+                        ✕
+                    </button>
                 </div>
 
                 {/* Scrollable Content */}
@@ -249,20 +255,20 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
 
                             </div>
 
-                            <div className="pt-6 border-t border-white/10 flex gap-4">
+                            <div className="pt-6 border-t border-white/10 flex gap-4 pb-8 sm:pb-0">
                                 <button
                                     type="button"
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
-                                    className="flex-1 px-4 py-3 bg-dark-800 text-gray-400 hover:text-white font-bold uppercase tracking-widest text-xs rounded-lg hover:bg-dark-700 transition"
+                                    className="flex-1 px-4 py-4 sm:py-3 bg-dark-800 text-gray-400 hover:text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-lg hover:bg-dark-700 transition"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading || uploading}
-                                    className="flex-[2] px-8 py-3 bg-secondary-600 text-white font-bold uppercase tracking-widest text-xs rounded-lg hover:bg-secondary-500 transition shadow-lg shadow-secondary-900/20 disabled:opacity-50"
+                                    className="flex-[2] px-8 py-4 sm:py-3 bg-secondary-600 text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs rounded-lg hover:bg-secondary-500 transition shadow-lg shadow-secondary-900/20 disabled:opacity-50"
                                 >
-                                    {loading ? (uploading ? 'Uploading...' : 'Processing...') : 'Complete Registration'}
+                                    {loading ? (uploading ? 'Uploading...' : 'Processing...') : 'Complete'}
                                 </button>
                             </div>
                         </div>

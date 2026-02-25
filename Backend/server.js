@@ -16,11 +16,28 @@ const cookieParser = require('cookie-parser');
 // Middleware
 app.use(cookieParser());
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://glamiconicindia.com',
+  'https://admin.glamiconicindia.com',
+  'https://glamicon-india.pages.dev',
+  'https://glam-icon-admin.pages.dev'
+];
+
 app.use(cors({
-  origin: true, // Allow any origin temporarily for debugging
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      // For development, you can still allow all by uncommenting below
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 app.use(morgan('dev'));
 app.use(express.json());

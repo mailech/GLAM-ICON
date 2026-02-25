@@ -9,17 +9,32 @@ const Dashboard = () => {
     const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
     const [selectedMedia, setSelectedMedia] = useState(null);
+    const [search, setSearch] = useState('');
+    const [date, setDate] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     useEffect(() => {
         fetchTickets();
         fetchStats();
-    }, [page]);
+    }, [page, filter, debouncedSearch, date]);
 
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
-            const res = await api.get('/api/tickets/admin/stats', {
+
+            let url = '/api/tickets/admin/stats?';
+            if (debouncedSearch) url += `&search=${debouncedSearch}`;
+            if (date) url += `&date=${date}`;
+
+            const res = await api.get(url, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.status === 'success') {
@@ -39,7 +54,12 @@ const Dashboard = () => {
                 return;
             }
 
-            const res = await api.get(`/api/tickets/admin/all?sort=-createdAt&page=${page}&limit=20`, {
+            let url = `/api/tickets/admin/all?sort=-createdAt&page=${page}&limit=20`;
+            if (filter !== 'all') url += `&applicationStatus=${filter}`;
+            if (debouncedSearch) url += `&search=${debouncedSearch}`;
+            if (date) url += `&date=${date}`;
+
+            const res = await api.get(url, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -78,10 +98,8 @@ const Dashboard = () => {
         }
     };
 
-    const filteredTickets = tickets.filter(t => {
-        if (filter === 'all') return true;
-        return (t.applicationStatus || 'pending') === filter;
-    });
+    // Use tickets directly since server already filters by applicationStatus
+    const filteredTickets = tickets;
 
     const getMediaUrl = (url) => {
         if (!url) return '';
@@ -220,17 +238,42 @@ const Dashboard = () => {
                             </button>
                         </div>
 
-                        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+                        <div className="flex gap-2 bg-dark-800 p-1 rounded-lg border border-white/5">
                             {['all', 'pending', 'shortlisted', 'rejected', 'completed'].map(f => (
                                 <button
                                     key={f}
-                                    onClick={() => setFilter(f)}
-                                    className={`whitespace-nowrap px-4 py-2 rounded uppercase text-xs font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'bg-dark-800 text-gray-400 hover:text-white'}`}
+                                    onClick={() => { setFilter(f); setPage(1); }}
+                                    className={`whitespace-nowrap px-3 py-1.5 rounded uppercase text-[10px] font-bold tracking-wider transition ${filter === f ? 'bg-secondary-600 text-white' : 'text-gray-400 hover:text-white'}`}
                                 >
                                     {f}
                                 </button>
                             ))}
                         </div>
+                    </div>
+                </div>
+
+                {/* --- FILTERS & SEARCH --- */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div className="relative md:col-span-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                            className="w-full bg-dark-800 border border-white/10 rounded-lg py-3 pl-10 pr-4 text-sm focus:border-secondary-500 outline-none transition"
+                        />
+                    </div>
+                    <div className="relative md:col-span-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📅</span>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => { setDate(e.target.value); setPage(1); }}
+                            className="w-full bg-dark-800 border border-white/10 rounded-lg py-3 pl-10 pr-4 text-sm focus:border-secondary-500 outline-none transition"
+                        />
+                    </div>
+                    <div className="flex gap-2 md:col-span-2">
                         <button
                             onClick={async () => {
                                 try {
@@ -250,13 +293,21 @@ const Dashboard = () => {
                                     alert("Failed to export Excel file.");
                                 }
                             }}
-                            className="hidden sm:block px-4 py-2 bg-green-600 text-white rounded text-xs font-bold uppercase tracking-widest hover:bg-green-500 transition ml-2"
+                            className="px-4 py-3 bg-green-600 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-green-500 transition flex-1"
                         >
-                            Export Excel
+                            Export
                         </button>
+                        {(search || date || filter !== 'all') && (
+                            <button
+                                onClick={() => { setSearch(''); setDate(''); setFilter('all'); setPage(1); }}
+                                className="px-4 py-3 bg-dark-800 border border-white/10 text-gray-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition flex-1"
+                            >
+                                Clear
+                            </button>
+                        )}
                         <button
                             onClick={handleLogout}
-                            className="hidden sm:block px-4 py-2 bg-red-900/20 text-red-500 border border-red-900/50 rounded text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition"
+                            className="px-4 py-3 bg-red-900/20 text-red-500 border border-red-900/50 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-900/40 transition flex-1"
                         >
                             Logout
                         </button>
@@ -304,7 +355,12 @@ const Dashboard = () => {
                                 )}
                                 {ticket.registrationData?.video && (
                                     <button onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.video })} className="px-4 py-2 bg-dark-700/50 text-white border border-white/10 rounded text-xs font-medium hover:bg-dark-600 flex-shrink-0 flex items-center gap-2">
-                                        <span>🎥</span> Video
+                                        <span>🎥</span> Intro Video
+                                    </button>
+                                )}
+                                {ticket.registrationData?.walkingVideo && (
+                                    <button onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.walkingVideo })} className="px-4 py-2 bg-dark-700/50 text-white border border-white/10 rounded text-xs font-medium hover:bg-dark-600 flex-shrink-0 flex items-center gap-2">
+                                        <span>🎥</span> Walk Video
                                     </button>
                                 )}
                                 {ticket.registrationData?.birthCertificate && (
@@ -420,7 +476,15 @@ const Dashboard = () => {
                                                         onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.video })}
                                                         className="text-left text-blue-400 hover:text-white flex items-center gap-1"
                                                     >
-                                                        <span>🎥</span> Play Video
+                                                        <span>🎥</span> Intro Video
+                                                    </button>
+                                                )}
+                                                {ticket.registrationData?.walkingVideo && (
+                                                    <button
+                                                        onClick={() => setSelectedMedia({ type: 'video', url: ticket.registrationData.walkingVideo })}
+                                                        className="text-left text-blue-400 hover:text-white flex items-center gap-1"
+                                                    >
+                                                        <span>🎥</span> Walk Video
                                                     </button>
                                                 )}
                                             </div>
