@@ -18,6 +18,8 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState('');
 
     if (!isOpen || !event) return null;
 
@@ -29,76 +31,91 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
         setFiles({ ...files, [e.target.name]: e.target.files[0] });
     };
 
-    const uploadToCloudinary = async (file) => {
-        const cloudName = 'dttb9lvfl'; // Your Cloudinary Cloud Name
-        const uploadPreset = 'glam_test'; // NEW Preset
+    const uploadToCloudinary = (file, onProgress) => {
+        return new Promise((resolve, reject) => {
+            const cloudName = 'dttb9lvfl';
+            const uploadPreset = 'glam_test';
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', uploadPreset);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
 
-        try {
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-                method: 'POST',
-                body: formData
-            });
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, true);
 
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error?.message || 'Upload failed');
-            }
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    onProgress(percentComplete);
+                }
+            };
 
-            const data = await res.json();
-            return data.secure_url;
-        } catch (err) {
-            console.error("Cloudinary Upload Error:", err);
-            throw err;
-        }
+            xhr.onload = () => {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve(response.secure_url);
+                    } else {
+                        reject(new Error(response.error?.message || 'Upload failed'));
+                    }
+                } catch (e) {
+                    reject(new Error('Invalid response from server'));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during upload'));
+            xhr.send(formData);
+        });
     };
 
     const uploadFiles = async () => {
         try {
             setUploading(true);
             const urls = {};
+            const fileOrder = [
+                { key: 'profilePhoto', label: 'Profile Photo' },
+                { key: 'birthCertificate', label: 'Birth Certificate' },
+                { key: 'video', label: 'Intro Video' },
+                { key: 'walkingVideo', label: 'Walk Video' }
+            ];
 
-            // Priority list of keys to ensure we upload in a specific order
-            const fileOrder = ['profilePhoto', 'birthCertificate', 'video', 'walkingVideo'];
-
-            for (const key of fileOrder) {
-                if (files[key]) {
-                    console.log(`Uploading ${key}...`);
+            for (const item of fileOrder) {
+                if (files[item.key]) {
+                    setUploadStatus(`Uploading ${item.label}...`);
+                    setUploadProgress(0);
                     try {
-                        const url = await uploadToCloudinary(files[key]);
-                        urls[key] = url;
+                        const url = await uploadToCloudinary(files[item.key], (progress) => {
+                            setUploadProgress(progress);
+                        });
+                        urls[item.key] = url;
                     } catch (fileErr) {
-                        throw new Error(`${key} upload failed: ${fileErr.message}`);
+                        throw new Error(`${item.label} upload failed: ${fileErr.message}`);
                     }
                 }
             }
 
+            setUploadStatus('Finalizing...');
             setUploading(false);
             return urls;
         } catch (err) {
             console.error('Upload Error:', err);
             setUploading(false);
-            alert(`Upload Error: ${err.message}. \n\nPlease ensure:\n1. Your video files are not too large (try under 10MB).\n2. You have a stable internet connection.`);
+            setUploadStatus('');
+            alert(`Upload Error: ${err.message}. \n\nPlease ensure your files are not too large and your connection is stable.`);
             return null;
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // 1. Upload files first
         setLoading(true);
         const uploadedUrls = await uploadFiles();
 
         if (uploadedUrls === null) {
             setLoading(false);
-            return; // Upload failed
+            return;
         }
 
-        // 2. Prepare Registration Data
         const registrationData = {
             ...uploadedUrls,
             name: formData.name,
@@ -107,12 +124,17 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
             dob: formData.dob,
             doB: formData.dob,
             age: formData.age,
-            socialLinks: user?.socialLinks || {} // Include social links from user profile
+            socialLinks: user?.socialLinks || {}
         };
 
-        // 3. Confirm Booking (No Payment Step)
-        onConfirm(registrationData);
-        setLoading(false);
+        try {
+            await onConfirm(registrationData);
+        } catch (err) {
+            console.error('Submission Error:', err);
+            alert('Failed to save registration. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -136,6 +158,44 @@ const EventBookingModal = ({ event, isOpen, onClose, onConfirm, user }) => {
                         ✕
                     </button>
                 </div>
+
+                {/* Upload Overlay */}
+                <AnimatePresence>
+                    {uploading && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-50 bg-dark-900/95 flex flex-col items-center justify-center p-8 text-center"
+                        >
+                            <div className="w-full max-w-[200px] aspect-square relative mb-6">
+                                <svg className="w-full h-full -rotate-90">
+                                    <circle
+                                        cx="100" cy="100" r="90"
+                                        stroke="currentColor" strokeWidth="8"
+                                        fill="transparent"
+                                        className="text-white/5"
+                                    />
+                                    <circle
+                                        cx="100" cy="100" r="90"
+                                        stroke="currentColor" strokeWidth="8"
+                                        fill="transparent"
+                                        strokeDasharray={565.48}
+                                        strokeDashoffset={565.48 * (1 - uploadProgress / 100)}
+                                        strokeLinecap="round"
+                                        className="text-secondary-500 transition-all duration-300"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-4xl font-display font-bold text-white">{uploadProgress}%</span>
+                                    <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Uploaded</span>
+                                </div>
+                            </div>
+                            <h4 className="text-white font-bold mb-2">{uploadStatus}</h4>
+                            <p className="text-xs text-gray-400 max-w-[220px]">Please don't close this window while we process your videos.</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Scrollable Content */}
                 <div className="overflow-y-auto p-6 custom-scrollbar">
